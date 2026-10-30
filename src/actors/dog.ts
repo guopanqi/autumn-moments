@@ -34,6 +34,11 @@ export class ParkDog {
     this.root.name='Park puppy';
     this.root.position.set(x,0,z);this.home.copy(this.root.position);
     this.destination.copy(this.home);this.root.add(this.body);
+    // Generous invisible ray target: prevents missed taps on a tiny animated head.
+    const hit=ball(.49,'#ffffff',0,.55,.10,10,8);
+    hit.material=new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0,depthWrite:false});
+    hit.castShadow=false;hit.receiveShadow=false;hit.name='Puppy interaction hit-area';
+    this.root.add(hit);
     this.body.add(ball(.35,'#d8a671',0,.47,0));
     this.head.position.set(0,.62,.30);this.body.add(this.head);
     this.head.add(ball(.285,'#e8c294',0,.04,.02));

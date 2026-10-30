@@ -322,7 +322,19 @@ test('puppy click gives affection only at gesture cue and survives reload',async
   await page.keyboard.down('KeyA');await page.waitForTimeout(130);await page.keyboard.up('KeyA');
   expect(await bond()).toBe(0);
   await clickDog();
-  await expect.poll(bond,{timeout:30000}).toBe(1);
+  try{
+    await expect.poll(bond,{timeout:30000}).toBe(1);
+  }catch(error){
+    const sceneState=await page.evaluate(()=>{
+      const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+      const dog=w.places.get('park').root.getObjectByName('Park puppy');
+      return {actor:{x:w.actor.position.x,z:w.actor.position.z,moving:w.actor.isMoving,acting:w.actor.isActing,
+        path:w.actor.path.length},dog:{x:dog.position.x,z:dog.position.z},
+        hovered:w.hovered?.id,toast:document.querySelector('#toast')?.textContent};
+    });
+    console.log('Puppy pet timeout state:',JSON.stringify(sceneState));
+    throw error;
+  }
   await page.reload();
   await expect(page.locator('#place-name')).toHaveText('街角的小公园',{timeout:15000});
   expect(await bond()).toBe(1);

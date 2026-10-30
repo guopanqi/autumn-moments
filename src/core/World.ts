@@ -38,6 +38,7 @@ export class World {
   private readonly places=new Map<PlaceId,Location>();
   private active!:Location;
   private hovered:Interaction|null=null;
+  private lastPointerHover:{x:number;y:number;at:number}|null=null;
   private readonly halo:THREE.Mesh;
   private readonly clock=new THREE.Clock();
   private elapsed=0;
@@ -263,8 +264,20 @@ export class World {
       let current:THREE.Object3D|null=hits[0].object;
       while(current){hit=this.active.interactions.find(i=>i.root===current)??null;if(hit)break;current=current.parent;}
     }
+    // A moving small animal and a smoothing camera can drift under a stationary
+    // cursor between hover and pointerdown. Honor the just-seen target at the
+    // same screen coordinate for a brief grace period.
+    if(activate&&!hit&&this.hovered&&this.lastPointerHover&&
+      performance.now()-this.lastPointerHover.at<850&&
+      Math.hypot(e.clientX-this.lastPointerHover.x,e.clientY-this.lastPointerHover.y)<18){
+      hit=this.hovered;
+    }
     this.setHover(hit);
-    if(!activate)return;
+    if(!activate){
+      this.lastPointerHover=hit?{x:e.clientX,y:e.clientY,at:performance.now()}:null;
+      return;
+    }
+    this.lastPointerHover=null;
     if(hit){hit.onTargeted?.();this.moveTo(hit.approach.clone(),()=>this.performInteraction(hit),hit.label);return;}
     const floorHits=this.raycaster.intersectObject(this.active.floor,false);
     if(floorHits.length)this.moveTo(floorHits[0].point,undefined,'那个位置',e.detail>=2);
