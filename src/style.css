@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
 :root{font-family:'Noto Sans SC',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#51554c;background:#eaf3e7;font-synthesis:none}
 *{box-sizing:border-box}html,body,#app{margin:0;width:100%;height:100%;overflow:hidden}
 #app{position:relative;isolation:isolate;background:#eaf3e7}

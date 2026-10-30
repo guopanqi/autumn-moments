@@ -8,7 +8,7 @@ function shelf(x:number,z:number){
   for(const yy of [.18,1.18,2.2])g.add(box(1.8,.13,.44,'#ac8060',0,yy,0));
   for(const xx of [-.8,.8])g.add(box(.13,2.3,.43,'#aa7c5d',xx,1.13,0));
   const colors=['#cc9988','#a3b8a3','#b1bfc9','#dbb981','#a78c81'];
-  for(let i=0;i<18;i++)g.add(box(.09+Math.random()*.035,.45+(i%4)*.065,.26,colors[i%5],-.7+i*.077,1.47+((i%4)*.065)/2,0));
+  for(let i=0;i<18;i++)g.add(box(.09+(i%3)*.013,.45+(i%4)*.065,.26,colors[i%5],-.7+i*.077,1.47+((i%4)*.065)/2,0));
   g.add(ball(.25,'#c4b89d',.5,2.47,0));return g;
 }
 function pot(x:number,z:number,scale=1){

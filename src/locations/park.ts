@@ -74,7 +74,7 @@ function homeExterior(x:number,z:number){
 }
 export function createPark():Location{
   const root=new THREE.Group();root.name='Park';const interactions:Interaction[]=[];
-  const obstacles:Obstacle=[];const rng=rand(48817);
+  const obstacles:Obstacle[]=[];const rng=rand(48817);
   const floor=ground(90,90,art.meadow);root.add(floor);
   // Large patches, path and soft plaza; layered geometry instead of a detailed texture.
   root.add(oval(11.2,7.9,'#b4cb9c',0,.012,0));

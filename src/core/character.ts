@@ -45,7 +45,7 @@ export class Character {
   cancel(){this.path=[];this.arrival=null;this.moving=false;}
   follow(path:THREE.Vector3[],done?:()=>void){this.path=path.slice();this.arrival=done??null;this.moving=path.length>0; if(path.length===0&&done)done();}
   act(kind:'wave'|'sip'|'sit'){this.gesture=kind;this.gestureTime=1.7;}
-  update(dt:number,elapsed:number){
+  update(dt:number,elapsed:number,manual=false){
     this.phase+=dt;
     if(this.path.length){
       const dest=this.path[0];const dx=dest.x-this.position.x,dz=dest.z-this.position.z;
@@ -60,7 +60,7 @@ export class Character {
         this.group.rotation.y+=diff*Math.min(1,dt*12);
       }
     }
-    const walk=this.path.length>0?1:0;
+    const walk=(this.path.length>0||manual)?1:0;
     const swing=Math.sin(elapsed*11)*.52*walk;
     this.leftLeg.rotation.x=swing;this.rightLeg.rotation.x=-swing;
     this.leftArm.rotation.x=-swing*.75;this.rightArm.rotation.x=swing*.75;

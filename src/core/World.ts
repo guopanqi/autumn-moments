@@ -189,7 +189,7 @@ export class World {
       const diff=Math.atan2(Math.sin(facing-this.actor.group.rotation.y),Math.cos(facing-this.actor.group.rotation.y));
       this.actor.group.rotation.y+=diff*Math.min(1,dt*12);
     }
-    this.actor.update(dt,this.elapsed);
+    this.actor.update(dt,this.elapsed,x!==0||z!==0);
     this.active.tick(this.elapsed,dt);
     this.camera.update(this.actor.position,dt);
     this.renderer.render(this.scene,this.camera.active);
