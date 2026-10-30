@@ -37,6 +37,8 @@ export class ParkDog {
   constructor(x:number,z:number,bond=0){
     this.bondLevel=clamp(Math.floor(bond),0,5);
     this.root.name='Park puppy';
+    // Debug/test-only read handle. Gameplay state is owned by ParkDog, not by the Mesh.
+    if(new URLSearchParams(window.location.search).has('e2e'))this.root.userData.controller=this;
     this.root.position.set(x,0,z);this.home.copy(this.root.position);
     this.destination.copy(this.home);this.root.add(this.body);
     // Generous invisible ray target: prevents missed taps on a tiny animated head.

@@ -358,7 +358,7 @@ test('fetch the ball only after the throw cue; dog returns it and retains normal
   });
   const state=()=>page.evaluate(()=>{
     const w=(window as Window&{__autumnDev?:any}).__autumnDev;
-    const dog=w.places.get('park').root.getObjectByName('Park puppy');
+    const dog=w.places.get('park').root.getObjectByName('Park puppy').userData.controller;
     const rack=w.places.get('park').root.getObjectByName('Puppy ball rack');
     return {fetching:dog.isFetching,phase:dog.fetchPhase,completed:dog.completedFetches,
       visible:rack.children.find((c:any)=>c.geometry?.type==='SphereGeometry')?.visible,
@@ -376,7 +376,7 @@ test('fetch the ball only after the throw cue; dog returns it and retains normal
   expect((await state()).visible).toBe(false);
   const finished=await page.evaluate(()=>{
     const w=(window as Window&{__autumnDev?:any}).__autumnDev;
-    const park=w.places.get('park'),dog=park.root.getObjectByName('Park puppy');
+    const park=w.places.get('park'),dog=park.root.getObjectByName('Park puppy').userData.controller;
     const player=w.actor.position.clone();
     for(let i=0;i<320&&dog.isFetching;i++)park.tick(w.elapsed+(i+1)*.05,.05,player);
     const rack=park.root.getObjectByName('Puppy ball rack');
@@ -396,7 +396,7 @@ test('cancelling a targeted moving-dog approach immediately releases its hold',a
   await page.goto('./?e2e=1');await expect(page.locator('#loading')).toBeHidden({timeout:15000});
   const result=await page.evaluate(()=>{
     const w=(window as Window&{__autumnDev?:any}).__autumnDev;
-    const dog=w.places.get('park').root.getObjectByName('Park puppy');
+    const dog=w.places.get('park').root.getObjectByName('Park puppy').userData.controller;
     const interaction=w.places.get('park').interactions.find((i:any)=>i.id==='park-dog');
     interaction.onTargeted();
     const during=dog.heldUntil;
