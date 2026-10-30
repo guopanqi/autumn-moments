@@ -56,3 +56,7 @@
 .decor-toggle[hidden]{display:none}
 .decor-panel .decor-close{position:absolute;top:11px;right:12px;padding:2px 8px;background:transparent;border:0;color:#728879;font-size:22px;line-height:1}
 @media(max-width:780px){.decor-toggle{top:142px;right:12px;padding:11px 13px;font-size:11px}}
+
+/* Editing commands wrap on narrower viewports without covering the viewport by default. */
+.decor-actions button{min-width:77px}.decor-panel{max-height:calc(100vh - 240px);overflow-y:auto}
+@media(max-width:780px){.decor-panel{max-height:calc(100vh - 245px)}.decor-actions button{min-width:57px}}

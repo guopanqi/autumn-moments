@@ -28,3 +28,11 @@ This project is Autumn Moments, a browser-first Three.js life-world. Read `docs/
 - Undo removes both visual geometry and the navigation obstacle, then persists the updated record.
 - Keep the furniture editor room-specific; do not turn every location into the same editor.
 - Keep save v1 migration functioning and treat save JSON as untrusted input.
+
+## V0.4 furniture editing invariants
+
+- Editing must retain stable furniture IDs and must not duplicate/remount an item until commit.
+- The original item remains in data/nav until confirmation, but preview validation ignores its own obstacle.
+- Cancel an uncommitted move before leaving the room; restore the original group and navigation obstacle.
+- All placement, moving, rotation, removal, undo, redo paths must persist the latest placement snapshot. Undo/redo history is session-only.
+- New UI controls must not intercept ordinary click-to-walk outside of the decoration panel.

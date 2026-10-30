@@ -57,3 +57,7 @@
 **原因**：先验证点击布置与空间反馈是否有趣，避免过早投入资产编辑器、背包和复杂家具权限。存档使用 v2 键并兼容 v1，而非破坏已保存的心情/经济。
 
 **待验证**：实际鼠标/触摸操作是否直观；可摆放区域是否过小、圆形代理是否太保守，以及房间内家具总体的表现力。
+
+## V0.4 — Edit committed furniture, not duplicated prefabs
+
+Keep one stable furniture ID through reposition/rotation. Editing uses a translucent independent preview, hides the old mesh temporarily, and updates the old navigation obstacle only at commit. A cancel restores the original mesh. Validations run on both preview and commit and temporarily exclude the selected object's prior obstacle. Snapshot-based undo/redo is scoped to one room and only persists final furniture data; it does not expand the global save schema.

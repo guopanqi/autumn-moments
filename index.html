@@ -12,7 +12,7 @@
     <div id="viewport" aria-label="可交互的三维生活场景"></div>
     <div class="vignette" aria-hidden="true"></div>
     <header class="topbar">
-      <div class="brand"><span class="brand-icon">✺</span><div><strong>秋日片刻</strong><small>AUTUMN MOMENTS · PROTOTYPE 0.3</small></div></div>
+      <div class="brand"><span class="brand-icon">✺</span><div><strong>秋日片刻</strong><small>AUTUMN MOMENTS · PROTOTYPE 0.4</small></div></div>
       <div class="statbar"><div class="stat">☀ <span id="time">09:20</span></div><div class="stat">♡ <span id="mood">70</span></div><div class="stat">◌ <span id="coins">20</span></div></div>
     </header>
     <aside class="placard" aria-live="polite"><span class="eyebrow">你所在的地方</span><h1 id="place-name">街角的小公园</h1><p id="place-note">微风、树影，还有一些值得停留的瞬间。</p></aside>
@@ -20,18 +20,21 @@
     <aside id="decor-panel" class="decor-panel" hidden aria-label="小屋装饰">
       <h2>布置小屋 <span>MY LITTLE HOME</span></h2>
       <button type="button" class="decor-close" id="decor-close" aria-label="关闭布置面板">×</button>
-      <p>选择一件家具，点击地板摆放。让这里慢慢变成自己的样子。</p>
+      <p>点击已有家具选择并移动；或选择新的家具摆放。所有改动都可以撤销。</p>
       <div class="decor-catalog">
         <button type="button" data-furniture="plant">✿ <span>绿植</span></button>
         <button type="button" data-furniture="stool">▤ <span>软凳</span></button>
         <button type="button" data-furniture="lamp">✧ <span>落地灯</span></button>
       </div>
       <div class="decor-actions">
+        <button type="button" id="decor-move">移动选中</button>
         <button type="button" id="decor-rotate">↻ 旋转</button>
-        <button type="button" id="decor-undo">撤销上一件</button>
+        <button type="button" id="decor-remove">收起家具</button>
+        <button type="button" id="decor-undo">↶ 撤销</button>
+        <button type="button" id="decor-redo">↷ 重做</button>
         <button type="button" id="decor-cancel">退出</button>
       </div>
-      <small id="decor-status">选择一件家具，再点击地板放置。</small>
+      <small id="decor-status">点击已有家具选择，或从上方添加新的家具。</small>
     </aside>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <div id="hint" class="interaction-hint" aria-live="polite"></div>

@@ -82,7 +82,7 @@ export class World {
     this.camera.resize(container.clientWidth,container.clientHeight);
   }
   switchPlace(id:PlaceId){
-    if(this.active){this.active.decoration?.cancel();this.scene.remove(this.active.root);}
+    if(this.active){this.active.decoration?.clearSelection();this.scene.remove(this.active.root);}
     this.active=this.places.get(id)!;
     this.scene.add(this.active.root);
     this.actor.teleport(this.active.spawn);
@@ -112,9 +112,12 @@ export class World {
   }
   private bindControls(container:HTMLElement){
     window.addEventListener('keydown',(e)=>{
-      if(this.active.decoration?.isPlacing){
-        if(e.code==='Escape'){e.preventDefault();this.cancelFurniture();return;}
-        if(e.code==='KeyR'){e.preventDefault();this.active.decoration.rotate();return;}
+      const decor=this.active.decoration;
+      const panel=document.getElementById('decor-panel');
+      if(decor&&panel&&!panel.hidden){
+        if(e.code==='Escape'){e.preventDefault();if(decor.isPlacing)this.cancelFurniture();else{decor.select(null);this.updateFurnitureHint('点击已经摆放的家具来选择它。');}return;}
+        if(e.code==='KeyR'){e.preventDefault();if(decor.isPlacing)decor.rotate();else if(decor.rotateSelected())this.updateFurnitureHint('已旋转选中的家具。');return;}
+        if(e.code==='Delete'||e.code==='Backspace'){e.preventDefault();if(decor.removeSelected())this.updateFurnitureHint('已移除家具，可以撤销。');return;}
       }
       if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();
       this.keys.add(e.code);
@@ -143,10 +146,26 @@ export class World {
         this.actor.cancel();this.setHover(null);
       }
     }));
-    document.getElementById('decor-rotate')?.addEventListener('click',()=>this.active.decoration?.rotate());
+    document.getElementById('decor-rotate')?.addEventListener('click',()=>{
+      const decor=this.active.decoration;
+      if(decor?.isPlacing)decor.rotate();else if(decor?.rotateSelected())this.updateFurnitureHint('已旋转选中的家具。');
+      else this.updateFurnitureHint('先点击一件已摆放的家具，再旋转。');
+    });
+    document.getElementById('decor-move')?.addEventListener('click',()=>{
+      if(this.active.decoration?.beginMove())this.updateFurnitureHint('点击新的地面位置完成移动；按 R 旋转，Esc 取消。');
+      else this.updateFurnitureHint('先点击一件已摆放的家具。');
+    });
+    document.getElementById('decor-remove')?.addEventListener('click',()=>{
+      const result=this.active.decoration?.removeSelected();
+      this.notify(result?'家具已收起，可以撤销。':'请先点击一件家具。');
+      if(result)this.updateFurnitureHint('家具已移除，可以撤销或重做。');
+    });
     document.getElementById('decor-cancel')?.addEventListener('click',()=>this.cancelFurniture());
     document.getElementById('decor-undo')?.addEventListener('click',()=>{
-      const result=this.active.decoration?.undo();this.notify(result?'撤销了最后放置的家具。':'暂时没有可以撤销的家具。');
+      const result=this.active.decoration?.undo();this.notify(result?'已撤销上一步布置。':'暂时没有可以撤销的操作。');
+    });
+    document.getElementById('decor-redo')?.addEventListener('click',()=>{
+      const result=this.active.decoration?.redo();this.notify(result?'已恢复上一步布置。':'暂时没有可以重做的操作。');
     });
     document.querySelectorAll<HTMLButtonElement>('[data-move]').forEach(button=>{
       const dir=button.dataset.move!;
@@ -159,12 +178,12 @@ export class World {
     });
   }
   private closeFurniturePanel(){
-    this.cancelFurniture();
+    this.active.decoration?.clearSelection();this.updateFurnitureHint('点击已放置的家具选择；也可以添加新的家具。');
     const panel=document.getElementById('decor-panel');if(panel)panel.hidden=true;
     const toggle=document.getElementById('decor-toggle');if(toggle)toggle.hidden=this.active.id!=='home';
   }
   private updateFurnitureHint(message:string){const text=document.getElementById('decor-status');if(text)text.textContent=message;}
-  private cancelFurniture(){this.active.decoration?.cancel();this.updateFurnitureHint('选择一件家具，再点击地板放置。');}
+  private cancelFurniture(){this.active.decoration?.cancel();this.updateFurnitureHint('点击已摆放的家具可继续调整，或者选择新的家具。');}
   private setHover(hit:Interaction|null){
     this.hovered=hit;this.halo.visible=!!hit;
     if(hit){this.halo.position.x=hit.approach.x;this.halo.position.z=hit.approach.z;}
@@ -191,6 +210,12 @@ export class World {
       }
       return;
     }
+    const panel=document.getElementById('decor-panel');
+    if(activate&&decor&&panel&&!panel.hidden&&decor.pick(this.raycaster)){
+      if(activate){this.actor.cancel();this.setHover(null);this.updateFurnitureHint('已选中家具：可移动、旋转或收起。');}
+      return;
+    }
+    if(activate&&decor&&panel&&!panel.hidden){decor.select(null);this.updateFurnitureHint('点击家具来选择它，或选择新品摆放。');}
     const roots=this.active.interactions.map(x=>x.root);
     const hits=this.raycaster.intersectObjects(roots,true);
     let hit:Interaction|null=null;
