@@ -69,6 +69,17 @@
 - [x] 视觉截图包含公园、小屋、布置完成的房间，可在 Actions artifact 中对照。
 - [ ] 真实手机触控与操作手感人工验收；浏览器自动化不等于美术完成。
 
+### V0.5 GitHub 回归记录（2026-10-30）
+
+- [x] GitHub Actions TypeScript/Vite 构建成功：[run 41022045056](https://github.com/guopanqi/autumn-moments/actions/runs/41022045056)。
+- [x] Playwright Chromium 四项浏览器测试通过：[run 41022045104](https://github.com/guopanqi/autumn-moments/actions/runs/41022045104)。涵盖公园到家、既有家具编辑、工作中断不发薪、完成工作获得 12 金币、购买落地灯并摆放、刷新后库存/金币/家具状态一致、移除/撤销/重做与 v2 旧档迁移。
+- [x] GitHub Pages 自动发布成功：[run 41022045053](https://github.com/guopanqi/autumn-moments/actions/runs/41022045053)。
+- [x] CI artifact 包含公园、室内、编辑家具与购买落地灯后室内截图；截图已用于确认场景实际渲染，但**不是**美术验收。
+- [ ] 真实手机触控（选择、购买、拖动、移动与视角）和游戏手感由用户本人检验；不得因为 Playwright Chromium 成功而勾选。
+- [ ] 人工视觉验收：工作台与人物交互表现、家具布置 UI 的清晰度、尺寸较小时的遮挡。
+
+V0.5 的“工作”只是一项公园内可重复的短动作，尚无工作日程、风险、策略或完整小游戏；这一范围限制是刻意的，不能将其描述为办公室工作玩法已经实现。
+
 ## Phase 3 — 牧场与动物（V0.6）
 
 - 一只小狗：自主活动、关注玩家、互动、跟随和情绪反馈。
