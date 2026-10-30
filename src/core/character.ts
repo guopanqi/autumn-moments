@@ -24,6 +24,9 @@ export class Character {
   private action:Action|null=null;
   private phase=0;
   private walkWeight=0;
+  private runWeight=0;
+  private gaitPhase=0;
+  private pathRunning=false;
   private moving=false;
   constructor(){
     this.group.name='Player · procedural chibi';
@@ -59,13 +62,13 @@ export class Character {
   get isMoving(){return this.moving;}
   get isActing(){return !!this.action;}
   teleport(p:THREE.Vector3){this.cancel();this.group.position.copy(p);this.group.rotation.y=0;}
-  cancel(){this.path=[];this.arrival=null;this.moving=false;this.cancelAction();}
+  cancel(){this.path=[];this.arrival=null;this.moving=false;this.pathRunning=false;this.cancelAction();}
   private cancelAction(){
     const previous=this.action;this.action=null;this.handheldCup.visible=false;
     previous?.onCancel?.();
   }
-  follow(path:THREE.Vector3[],done?:()=>void){
-    this.cancel();this.path=path.slice();this.arrival=done??null;this.moving=path.length>0;
+  follow(path:THREE.Vector3[],done?:()=>void,run=false){
+    this.cancel();this.path=path.slice();this.pathRunning=run;this.arrival=done??null;this.moving=path.length>0;
     if(path.length===0){this.arrival=null;done?.();}
   }
   faceTowards(point:THREE.Vector3){
@@ -76,11 +79,11 @@ export class Character {
     this.cancelAction();this.path=[];this.arrival=null;this.moving=false;
     this.action={kind,elapsed:0,duration:DURATIONS[kind],moment:kind==='sip'?.57:kind==='rest'?.53:.48,fired:false,onMoment,onFinish,onCancel};
   }
-  update(dt:number,elapsed:number,manual=false){
+  update(dt:number,elapsed:number,manual=false,manualRunning=false){
     this.phase+=dt;
     if(this.path.length){
       const dest=this.path[0],dx=dest.x-this.position.x,dz=dest.z-this.position.z;
-      const length=Math.hypot(dx,dz),step=art.animation.walkSpeed*dt;
+      const length=Math.hypot(dx,dz),step=(this.pathRunning?art.animation.runSpeed:art.animation.walkSpeed)*dt;
       if(length<=Math.max(step,.055)){
         this.position.set(dest.x,0,dest.z);this.path.shift();
         if(!this.path.length){this.moving=false;const cb=this.arrival;this.arrival=null;cb?.();}
@@ -88,16 +91,19 @@ export class Character {
         this.position.x+=dx/length*step;this.position.z+=dz/length*step;
         const facing=Math.atan2(dx,dz);
         const diff=Math.atan2(Math.sin(facing-this.group.rotation.y),Math.cos(facing-this.group.rotation.y));
-        this.group.rotation.y+=diff*Math.min(1,dt*12);
+        this.group.rotation.y+=diff*(1-Math.exp(-art.animation.turnDamping*dt));
       }
     }
-    this.walkWeight=THREE.MathUtils.damp(this.walkWeight,(this.path.length>0||manual)?1:0,9,dt);
-    const stride=Math.sin(elapsed*11)*.52*this.walkWeight;
+    const moving=this.path.length>0||manual, running=moving&&(this.pathRunning||manualRunning);
+    this.walkWeight=THREE.MathUtils.damp(this.walkWeight,moving?1:0,9,dt);
+    this.runWeight=THREE.MathUtils.damp(this.runWeight,running?1:0,7,dt);
+    this.gaitPhase+=dt*(10+this.runWeight*4);
+    const stride=Math.sin(this.gaitPhase)*(.48+this.runWeight*.15)*this.walkWeight;
     this.leftLeg.rotation.x=stride;this.rightLeg.rotation.x=-stride;
     this.leftArm.rotation.x=-stride*.75;this.rightArm.rotation.x=stride*.75;
     this.rightArm.rotation.z=0;this.leftArm.rotation.z=0;
-    this.body.position.y=this.walkWeight*Math.abs(Math.sin(elapsed*11))*.042+(1-this.walkWeight)*Math.sin(elapsed*2.4)*.012;
-    this.body.rotation.x=0;this.body.rotation.z=Math.sin(elapsed*.95)*.012;
+    this.body.position.y=this.walkWeight*Math.abs(Math.sin(this.gaitPhase))*(.042+this.runWeight*.035)+(1-this.walkWeight)*Math.sin(elapsed*2.4)*.012;
+    this.body.rotation.x=-.11*this.runWeight;this.body.rotation.z=Math.sin(elapsed*.95)*.012;
     // Brief blinks, not a permanently half-closed face.
     const blink=(elapsed%4.8>4.61||elapsed%7.9>7.79)? .13:1;
     this.eyes.forEach(eye=>eye.scale.y=blink);

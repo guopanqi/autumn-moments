@@ -46,6 +46,7 @@ export class World {
   private toastTimer=0;
   private transitioning=false;
   private startTime=9*60+20;
+  private sunlight!:THREE.DirectionalLight;
   constructor(container:HTMLElement){
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
@@ -57,16 +58,16 @@ export class World {
     this.renderer.toneMappingExposure=art.exposure;
     this.renderer.domElement.style.touchAction='none';container.appendChild(this.renderer.domElement);
     this.scene.background=new THREE.Color(art.sky);
-    this.scene.fog=new THREE.Fog(art.fog,30,90);
+    this.scene.fog=new THREE.Fog(art.fog,55,140);
     this.scene.add(new THREE.HemisphereLight('#f6fff5','#d3b891',2.15));
     const sun=new THREE.DirectionalLight('#fff1d2',3.1);
     sun.position.set(-8,18,12);sun.castShadow=true;
     sun.shadow.mapSize.set(2048,2048);
-    sun.shadow.camera.left=-24;sun.shadow.camera.right=24;
-    sun.shadow.camera.top=24;sun.shadow.camera.bottom=-24;
+    sun.shadow.camera.left=-19;sun.shadow.camera.right=19;
+    sun.shadow.camera.top=19;sun.shadow.camera.bottom=-19;
     sun.shadow.camera.near=.5;sun.shadow.camera.far=60;
     sun.shadow.bias=-.00012;sun.shadow.normalBias=.018;
-    this.scene.add(sun);
+    this.scene.add(sun,sun.target);this.sunlight=sun;
     this.scene.add(this.actor.group);
     const ring=new THREE.Mesh(new THREE.RingGeometry(.57,.66,40),new THREE.MeshBasicMaterial({color:'#f2dfae',side:THREE.DoubleSide,transparent:true,opacity:.72,depthWrite:false}));
     ring.rotation.x=-Math.PI/2;ring.position.y=.065;ring.visible=false;this.scene.add(ring);this.halo=ring;
@@ -261,9 +262,9 @@ export class World {
     if(!activate)return;
     if(hit){this.moveTo(hit.approach,()=>this.performInteraction(hit),hit.label);return;}
     const floorHits=this.raycaster.intersectObject(this.active.floor,false);
-    if(floorHits.length)this.moveTo(floorHits[0].point,undefined,'那个位置');
+    if(floorHits.length)this.moveTo(floorHits[0].point,undefined,'那个位置',e.detail>=2);
   }
-  private moveTo(point:THREE.Vector3,done?:()=>void,targetLabel='这里'){
+  private moveTo(point:THREE.Vector3,done?:()=>void,targetLabel='这里',run=false){
     const b=this.active.bounds;
     const goal=new THREE.Vector3(clamp(point.x,b.minX,b.maxX),0,clamp(point.z,b.minZ,b.maxZ));
     const path=findPath(this.actor.position,goal,b,this.active.obstacles);
@@ -272,7 +273,7 @@ export class World {
       else this.notify('暂时走不到'+targetLabel+'，试试从另一侧靠近。');
       return;
     }
-    this.actor.follow(path,done);
+    this.actor.follow(path,done,run);
   }
   private performInteraction(hit:Interaction){
     if(!this.active.interactions.includes(hit))return;
@@ -323,21 +324,26 @@ export class World {
     if(this.keys.has('KeyW')||this.keys.has('ArrowUp')||this.mobileKeys.has('up'))z-=1;
     if(this.keys.has('KeyS')||this.keys.has('ArrowDown')||this.mobileKeys.has('down'))z+=1;
     let moved=false;
+    const running=this.active.id==='park'&&(this.keys.has('ShiftLeft')||this.keys.has('ShiftRight')||this.mobileKeys.has('run'));
     if(!this.transitioning&&(x!==0||z!==0)){
       this.actor.cancel();
       const l=Math.hypot(x,z),dir=new THREE.Vector3(x/l,0,z/l);
-      const next=this.actor.position.clone().addScaledVector(dir,art.animation.walkSpeed*dt);
+      const next=this.actor.position.clone().addScaledVector(dir,(running?art.animation.runSpeed:art.animation.walkSpeed)*dt);
       const b=this.active.bounds;
       next.x=clamp(next.x,b.minX,b.maxX);next.z=clamp(next.z,b.minZ,b.maxZ);
       const blocked=this.active.obstacles.some(o=>(next.x-o.x)**2+(next.z-o.z)**2<(o.r+.25)**2);
       if(!blocked){this.actor.position.copy(next);moved=true;}
       const facing=Math.atan2(dir.x,dir.z);
       const diff=Math.atan2(Math.sin(facing-this.actor.group.rotation.y),Math.cos(facing-this.actor.group.rotation.y));
-      this.actor.group.rotation.y+=diff*Math.min(1,dt*12);
+      this.actor.group.rotation.y+=diff*(1-Math.exp(-art.animation.turnDamping*dt));
     }
-    this.actor.update(dt,this.elapsed,moved);
+    this.actor.update(dt,this.elapsed,moved,running);
     this.active.tick(this.elapsed,dt,this.actor.position);
-    this.camera.update(this.actor.position,dt);
+    this.camera.update(this.actor.position,dt,running);
+    // Shadow detail follows the actor over a larger neighborhood without a giant shadow map.
+    const px=Math.round(this.actor.position.x*2)/2,pz=Math.round(this.actor.position.z*2)/2;
+    this.sunlight.target.position.set(px,0,pz);
+    this.sunlight.position.set(px-10,21,pz+12);
     this.renderer.render(this.scene,this.camera.active);
     if(this.toastTimer>0){this.toastTimer-=dt;if(this.toastTimer<=0)document.getElementById('toast')?.classList.remove('visible');}
     if(Math.floor(this.elapsed*3)%3===0)this.renderHUD();

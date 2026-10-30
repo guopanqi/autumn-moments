@@ -7,5 +7,5 @@ export const art = {
   cream: '#fff2d9', mutedBlue: '#8db9c4', coral: '#e09b8e',
   wall: '#f4dfc0', floor: '#d5aa76', ink: '#48515c',
   shadowOpacity: 0.2, exposure: 1.25,
-  animation: { walkSpeed: 2.7, approachDistance: 0.75, cameraDamping: 3.8 },
+  animation: { walkSpeed: 2.7, runSpeed: 4.75, turnDamping: 9, approachDistance: 0.75, cameraDamping: 3.8 },
 } as const;

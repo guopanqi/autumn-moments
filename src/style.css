@@ -68,3 +68,6 @@
 .decor-catalog button:disabled{opacity:.42;cursor:not-allowed;transform:none!important}
 .decor-item [data-furniture]{background:#edf2e7}
 @media(max-width:780px){.decor-catalog .decor-item button{font-size:9px;padding:6px 2px}}
+
+/* Touch run input is opt-in, does not cover the left-side direction pad. */
+.mobile-controls .run-button{grid-column:3;grid-row:1;background:#fff0cfdd;font-size:12px;font-weight:700}

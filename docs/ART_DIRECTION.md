@@ -52,3 +52,10 @@ V0.1 的动作是临时姿态。不得把临时动画视为“已达到最终演
 代码只引用语义资产 ID（`character/default`, `furniture/tea_table` 等），后续使用 GLB 替换同 ID 下的可视 Mesh；碰撞、互动锚点与表现对象分离。资源可以先在 GitHub 内上传许可合规的 glTF；Blender 在后期作为制作工具加入，不应改变运行时接口。
 
 **注意**：V0.1 的“好看”要靠实际截图验证。当前只是一套有审美取向的候选参数，不是经过玩家和美术评审的终稿。
+
+
+## Summer Afternoon reference study / 2026-10-30
+- Research source: https://summer-afternoon.vlucendo.com/ and https://discourse.threejs.org/t/summer-afternoon/46963 . Original author explicitly states his project source is **not open source and not reusable**; our work recreates only independently observed visual principles.
+- Separate approachable foreground landmarks from far-reaching road silhouettes; lower outdoor camera retains a readable 3/4 character, higher ceiling of sky, trees and distant architecture.
+- Prioritize turning coherence, running cadence, grounded feet and a slightly widening running FOV over expensive bloom/shader stacks; retain existing warm diorama color language.
+- Desktop and mobile comparison must evaluate actual perspective, navigation, perceived depth, and animation. Automated screenshots are review artifacts, not visual acceptance.

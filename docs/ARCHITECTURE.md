@@ -109,3 +109,9 @@ V0.3 已有 `autumn-moments:v2`，保存 `{ mood, coins, place, furniture:[{id,k
 - `stock[kind] = owned[kind] - placed.filter(kind).length`。移动、旋转、收起和撤销/重做只更新布局；所有权不重复变更。库存推导而不是独立保存，因此刷新后不会不同步。
 - `autumn-moments:v3` 保存 mood/coins/place/furniture/owned，兼容 v1/v2；旧已摆放的家具自动计入已拥有，空间非法的旧摆件会被拒绝渲染而不会产生免费复制。
 - 当前公园短时整理可重复，尚无体力、工资周期或完整工作策略；明确留作玩法后续设计。移动端触控及美术仍需人工验证。
+
+
+## Outdoor locomotion / 2026-10-30
+- Click-to-move uses grid A* only when a direct collision-clear segment fails. The returned grid route is string-pulled with circular obstacle clearance; yaw follows its simplified segments, not individual 0.45m cell centers.
+- Walking/running use separate configured speeds and stride cadence; manual run is Shift (touch button), double-clicking ground starts a run-to-point. Outdoor camera stays in a world-oriented 3/4 follow angle for consistent WASD and click projection, with a lower view and a subtle run FOV change. No borrowed Summer Afternoon code.
+- A player-following directional shadow frustum keeps the larger neighborhood within the shadow map; never expand the shadow camera indefinitely to cover all distant meshes.
