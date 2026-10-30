@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {art} from '../art/style';
+import {makeSky} from '../art/sky';
 import {Character} from './character';
 import {CameraRig} from './CameraRig';
 import {findPath} from './navigation';
@@ -47,6 +48,7 @@ export class World {
   private transitioning=false;
   private startTime=9*60+20;
   private sunlight!:THREE.DirectionalLight;
+  private skyDome!:THREE.Mesh;
   constructor(container:HTMLElement){
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
@@ -57,10 +59,11 @@ export class World {
     this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure=art.exposure;
     this.renderer.domElement.style.touchAction='none';container.appendChild(this.renderer.domElement);
-    this.scene.background=new THREE.Color(art.sky);
+    this.scene.background=new THREE.Color(art.skyHorizon);
+    this.skyDome=makeSky();this.scene.add(this.skyDome);
     this.scene.fog=new THREE.Fog(art.fog,55,140);
-    this.scene.add(new THREE.HemisphereLight('#f6fff5','#d3b891',2.15));
-    const sun=new THREE.DirectionalLight('#fff1d2',3.1);
+    this.scene.add(new THREE.HemisphereLight('#f6fff5','#d3b891',art.lightAmbient));
+    const sun=new THREE.DirectionalLight('#fff1d2',art.lightSun);
     sun.position.set(-8,18,12);sun.castShadow=true;
     sun.shadow.mapSize.set(1024,1024);
     sun.shadow.camera.left=-19;sun.shadow.camera.right=19;
@@ -351,6 +354,7 @@ export class World {
     const px=Math.round(this.actor.position.x*2)/2,pz=Math.round(this.actor.position.z*2)/2;
     this.sunlight.target.position.set(px,0,pz);
     this.sunlight.position.set(px-10,21,pz+12);
+    this.skyDome.position.copy(this.camera.active.position);
     this.renderer.render(this.scene,this.camera.active);
     if(this.toastTimer>0){this.toastTimer-=realDt;if(this.toastTimer<=0)document.getElementById('toast')?.classList.remove('visible');}
     if(Math.floor(this.elapsed*3)%3===0)this.renderHUD();

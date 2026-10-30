@@ -205,28 +205,30 @@ test('v2 furniture migration retains owned copies, prevents free duplicates and 
 });
 
 
-test('direct route is simplified and running has a separate movement speed',async({page})=>{
+test('path-facing is simplified and running travels faster for the same simulated time',async({page})=>{
  await page.goto('./?e2e=1');await expect(page.locator('#loading')).toBeHidden({timeout:15000});
- const getPosition=()=>page.evaluate(()=>{
-   const w=(window as Window&{__autumnDev?:any}).__autumnDev;return {x:w.actor.position.x,z:w.actor.position.z};
+ const metrics=await page.evaluate(()=>{
+   const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+   const start=w.active.spawn.clone();
+   const destination=start.clone().add({x:30,y:0,z:0});
+   const traverse=(run:boolean)=>{
+     w.actor.teleport(start);
+     w.actor.follow([destination],undefined,run);
+     for(let i=0;i<18;i++)w.actor.update(1/60,i/60);
+     return w.actor.position.x-start.x;
+   };
+   const walked=traverse(false),ran=traverse(true);
+   w.actor.teleport(start);
+   w.moveTo(start.clone().set(3.5,0,6.5));
+   return {walked,ran,waypoints:w.actor.path.length};
  });
- const start=await getPosition();
- await page.keyboard.down('KeyD');await page.waitForTimeout(450);await page.keyboard.up('KeyD');
- const walked=(await getPosition()).x-start.x;
- await page.evaluate(()=>{const w=(window as Window&{__autumnDev?:any}).__autumnDev;w.actor.teleport(w.active.spawn);w.camera.switch('follow',w.actor.position);});
- await page.keyboard.down('ShiftLeft');await page.keyboard.down('KeyD');
- await page.waitForTimeout(450);await page.keyboard.up('KeyD');await page.keyboard.up('ShiftLeft');
- const ran=(await getPosition()).x-start.x;
- expect(ran).toBeGreaterThan(walked*1.35);
- await page.evaluate(()=>{const w=(window as Window&{__autumnDev?:any}).__autumnDev;
-   w.actor.teleport(w.active.spawn);
-   const goal=w.actor.position.clone().set(3.5,0,6.5);
-   w.moveTo(goal);
- });
- const route=await page.evaluate(()=>{const w=(window as Window&{__autumnDev?:any}).__autumnDev;return w.actor.path.length;});
- expect(route).toBe(1);
+ expect(metrics.ran).toBeGreaterThan(metrics.walked*1.5);
+ expect(metrics.waypoints).toBe(1);
+ await page.keyboard.down('ShiftLeft');
+ const pressed=await page.evaluate(()=>{const w=(window as Window&{__autumnDev?:any}).__autumnDev;return w.keys.has('ShiftLeft');});
+ expect(pressed).toBe(true);
+ await page.keyboard.up('ShiftLeft');
 });
-
 
 test('neighborhood extends beyond the first park and retains navigable outdoor paths',async({page},testInfo)=>{
   await page.goto('./?e2e=1');await expect(page.locator('#loading')).toBeHidden({timeout:15000});

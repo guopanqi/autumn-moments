@@ -156,7 +156,7 @@ export function extendPark(root:THREE.Group,obstacles:Obstacle[],interactions:In
   // A distant ridge adds layered depth beyond the playable bounds; do not use opaque fog to hide a hard edge.
   for(let i=0;i<12;i++){
     const x=-46+i*8.3;
-    const hill=ball(7.8,i%3===0?'#b4c7b5':i%2===0?'#a5beb0':'#c2d0b7',x,1.2+(i%3)*.7,-46,10,7);
+    const hill=ball(7.8,i%3===0?'#8cac9c':i%2===0?'#a0bca9':'#aabf9c',x,1.2+(i%3)*.7,-46,10,7);
     hill.scale.set(1.3,.55,.8);hill.castShadow=false;decor.add(hill);
   }
   const haze=new THREE.Group();decor.add(haze);

@@ -28,7 +28,7 @@ export class CameraRig {
   }
   private desired(focus:THREE.Vector3,mode:CameraMode){
     return mode==='follow'
-      ?new THREE.Vector3(focus.x+5.6,focus.y+7.3,focus.z+12.8)
+      ?new THREE.Vector3(focus.x+4.5,focus.y+5.8,focus.z+14.1)
       :new THREE.Vector3(11.7,15.6,17.3);
   }
   update(focus:THREE.Vector3,dt:number,running=false){

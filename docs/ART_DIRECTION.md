@@ -63,3 +63,6 @@ V0.1 的动作是临时姿态。不得把临时动画视为“已达到最终演
 
 ## The extended neighborhood is not an enormous generic plane
 The original park is still the recognizable center; the new curving walks lead toward residential roofs, a flower pergola and water. Long views have foreground paths, mid-ground landmarks and a pale distant ridge. Details in peripheral grass use InstancedMesh (one mesh per category), while focal objects retain distinct meshes. Keep the warm diorama palette: Summer Afternoon is a reference for *spatial rhythm and locomotion*, not a mandate to use its exact shaders or assets.
+
+## Visual correction from actual Chromium screenshots
+The first expanded park screenshots had washed-out materials and a floating foreground sign that obscured the path. We lowered exposure/ambient intensity, retained a warmer directional key, removed the obstructing sign, lowered the outdoor follow camera and added an independent sky gradient with blue zenith and warm horizon. Values are centralized in art/style.ts. These are prototype corrections, not a recreation of Summer Afternoon's non-open-source shaders; human visual acceptance remains open.
