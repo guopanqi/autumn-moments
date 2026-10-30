@@ -40,8 +40,9 @@ test('outdoor and home remain playable; furniture persists',async({page},testInf
   await expect(page.locator('#place-name')).toHaveText('午后的小屋');
   await expect.poll(async()=>page.evaluate(()=>JSON.parse(localStorage.getItem('autumn-moments:v2')??'{}').furniture?.length)).toBe(1);
   await page.locator('#decor-toggle').click();
+  // Undo/redo history is deliberately session-scoped. Refresh must keep the committed room.
   await page.locator('#decor-undo').click();
-  await expect.poll(async()=>page.evaluate(()=>JSON.parse(localStorage.getItem('autumn-moments:v2')??'{}').furniture?.length)).toBe(0);
+  await expect.poll(async()=>page.evaluate(()=>JSON.parse(localStorage.getItem('autumn-moments:v2')??'{}').furniture?.length)).toBe(1);
   await page.locator('#go-park').click();
   await expect(page.locator('#place-name')).toHaveText('街角的小公园');
   expect(errors).toEqual([]);
