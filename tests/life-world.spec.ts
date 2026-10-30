@@ -114,6 +114,8 @@ test('paid park action funds a lamp, which remains owned through placement, remo
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto('./?e2e=1');
   await expect(page.locator('#loading')).toHaveClass(/hidden/,{timeout:15_000});
+  // CSS fade delays visibility:hidden: pointer events must reach the canvas, not the loader.
+  await expect(page.locator('#loading')).toBeHidden();
   const save=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('autumn-moments:v3')??'{}'));
   const point=async(x:number,y:number,z:number)=>page.evaluate(({x,y,z})=>{
     const w=(window as Window & {__autumnDev?:any}).__autumnDev;
@@ -124,18 +126,6 @@ test('paid park action funds a lamp, which remains owned through placement, remo
   },{x,y,z});
   const work=await point(-2.75,1.63,2.55);
   await page.mouse.move(work.x,work.y);
-  const probe=await page.evaluate(({x,y})=>{
-    const w=(window as Window & {__autumnDev?:any}).__autumnDev;
-    const rect=document.querySelector<HTMLCanvasElement>('#viewport canvas')!.getBoundingClientRect();
-    w.pointer.set((x-rect.left)/rect.width*2-1,-(y-rect.top)/rect.height*2+1);
-    w.raycaster.setFromCamera(w.pointer,w.camera.active);
-    const target=w.places.get('park').interactions.find((i:any)=>i.id==='park-work');
-    return {workHits:w.raycaster.intersectObject(target.root,true).length,
-      firstHit:w.raycaster.intersectObjects(w.places.get('park').interactions.map((i:any)=>i.root),true)[0]?.object.name,
-      hint:document.querySelector('#hint')?.textContent,
-      player:{x:w.actor.position.x,z:w.actor.position.z}};
-  },work);
-  console.log('Park work click diagnostic',JSON.stringify({work,probe}));
   await expect(page.locator('#hint')).toContainText('整理花坛');
   await page.mouse.click(work.x,work.y);
   await expect.poll(async()=>(await save()).coins,{timeout:20000}).toBe(32);
