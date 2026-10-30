@@ -25,7 +25,7 @@
 - 独立的交互定义、地点契约、镜头策略、全局艺术参数
 - 心情、金币、虚拟时间和浏览器存档
 - 移动端方向按钮、响应式 UI
-- GitHub Actions 自动类型检查与构建、Pages 构建部署
+- GitHub Actions 自动类型检查、Vite 构建、Pages 部署，并用 Playwright + Chromium 进行 WebGL 浏览器冒烟测试与截图归档
 
 本版仍使用程序化几何，不是最终骨骼模型。V0.2 的动作系统是可替换的表演适配层；**真人浏览器视觉/交互回归验收仍然必要**。尚未实现家具拖拽重排、商品购买、牧场或办公室潜行。
 
@@ -45,7 +45,7 @@
 1. 在仓库的 **Code → Codespaces → Create codespace on main** 打开云端工作空间。
 2. `postCreateCommand` 自动执行 `npm install`；终端运行 `npm run dev`。
 3. 在自动转发的 **5173** 端口打开浏览器预览；修改代码即可热更新。
-4. 提交分支、开 Pull Request；CI 检查通过后合并到 `main`。
+4. 提交分支、开 Pull Request；CI 和 `Browser smoke & screenshots` 检查通过后合并到 `main`。
 5. Pages 使用仓库 **Settings → Pages → Build and deployment → Source: GitHub Actions**。工作流见 `.github/workflows/pages.yml`。
 
 如果没有 Codespaces，也可以直接在 GitHub 网页编辑源码；提交后由 Actions 自动构建。但 `github.dev` 本身不能运行 Vite 服务。

@@ -97,3 +97,7 @@ V0.3 已有 `autumn-moments:v2`，保存 `{ mood, coins, place, furniture:[{id,k
 - 没有真实的资产替换过程与视觉回归截图流程。
 
 不要因为写了接口就宣称实现了对应的完整系统。
+
+## 浏览器级回归测试
+
+`tests/life-world.spec.ts` 使用 Playwright/Chromium 检查入口、相机视图切换和家具持久化。测试只在 `?e2e=1` 网址中借用 World 实例将世界坐标投影到真实点击坐标，避免只调用内部布置 API 而没有测试交互控件。截图是 CI 的检查材料，不能代替人工视觉判断。

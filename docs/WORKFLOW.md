@@ -35,3 +35,9 @@ Pages 必须在 Settings → Pages → Build and deployment → Source 中选择
 ## 以后何时引入 Blender
 
 只有当程序角色已不足以表达目标动作、需要系统性骨骼绑定、精细家具建模或可控贴图时，才引入。开发主循环依然保持 GitHub-first，Blender 作为制作生产资产的工具而非运行时依赖。优先采用 `.glb` + 约定的单位/朝向/骨骼动作名，保留代码式场景配置。
+
+## 自动浏览器验收（2026-10-30 新增）
+
+`.github/workflows/smoke.yml` 在 GitHub Actions 上安装 Chromium / SwiftShader，运行 `npm run test:smoke`。它检查 WebGL 启动、公园→小屋场所切换、选择家具/旋转/放置、刷新存档恢复、撤销与再回公园，且将公园、小屋、布置完成时截图作为 workflow artifact 保存七天。
+
+这是**自动回归**，不是视觉评审：它无法自行判断色彩、人物情绪和动作是否达到了参考图要求。无 CI 证据时不得宣称浏览器通过。测试 `?e2e=1` 参数开放只读/诊断用 World 对象给自动化查询并投影坐标，平常页面不开放。
