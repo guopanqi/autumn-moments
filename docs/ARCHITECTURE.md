@@ -19,6 +19,7 @@ src/
   core/CameraRig.ts     透视跟随与正交等距相机
   core/character.ts     程序化角色 + 阶段式可取消动作表演层
   actors/dog.ts         有独立时钟与反馈的公园动物行为
+  decor/furniture.ts    小屋专属家具布置、数据、碰撞与存档出口
   core/navigation.ts    小型场景 A* 寻路
   locations/park.ts     公园组装、互动注册、局部行为
   locations/home.ts     小屋组装、互动注册、局部行为
@@ -62,7 +63,7 @@ V0.1 使用 0.45m 规则网格 A* + 圆形静态障碍，能够避免走过桌�
 
 ## 世界状态与存档
 
-V0.2 仍沿用 V0.1 的浏览器存档，仅包含 `{ mood, coins, place }`。键 `autumn-moments:v1`。**时间仅在会话内**，人物位置和家具摆放不保存；不宣称实现完整世界持久化。
+V0.3 已有 `autumn-moments:v2`，保存 `{ mood, coins, place, furniture:[{id,kind,x,z,rotation}] }`。读取时兼容 v1 的 `{mood, coins,place}`；摆放家具存储稳定 ID 而非 Mesh 序号。当前没有购买库存、多个房间、家具修改历史栈。**时间仅在会话内**，人物位置不保存。
 
 未来的状态形式：
 
@@ -91,7 +92,7 @@ V0.2 仍沿用 V0.1 的浏览器存档，仅包含 `{ mood, coins, place }`。�
 - 摄像机尚未做到角色与场景遮挡时的透明化/绕行。
 - 障碍物是圆形近似；室内家具边缘体验仍需改良。
 - 角色没有骨骼，当前动作有明确事件时机但仍是程序姿态；需要 GLB 的动画 clip 与手部 attachment 适配。
-- 地点布局代码化，尚未移到声明式场景 JSON。
+- 地点的静态布局代码化；用户摆放的家具已经分离为可保存的数据对象，但静态关卡仍未移到 JSON。
 - 数据层与表现层在 V0.1 仍有耦合，扩大前需要抽出 action controller。
 - 没有真实的资产替换过程与视觉回归截图流程。
 

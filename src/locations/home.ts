@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {art} from '../art/style';
 import {add,ball,box,cone,cylinder,ground,matte,oval,rand,sign} from '../core/geo';
 import type {Location,Interaction,Obstacle} from '../core/types';
+import {HomeDecoration,type PlacedFurniture} from '../decor/furniture';
 
 function shelf(x:number,z:number){
   const g=new THREE.Group();g.position.set(x,0,z);
@@ -20,7 +21,7 @@ function pot(x:number,z:number,scale=1){
   }
   return g;
 }
-export function createHome():Location{
+export function createHome(initial:PlacedFurniture[]=[],save:(items:PlacedFurniture[])=>void=()=>{}):Location{
   const root=new THREE.Group();root.name='Home';const interactions:Interaction[]=[];
   const obstacles:Obstacle[]=[];
   const floor=ground(12,11,'#cda476');root.add(floor);
@@ -93,9 +94,10 @@ export function createHome():Location{
     curl.material=new THREE.MeshBasicMaterial({color:'#fff9ef',transparent:true,opacity:.38,depthWrite:false});
     curls.push(curl);steam.add(curl);
   }
+  const decoration=new HomeDecoration(root,obstacles,{minX:-5.35,maxX:5.35,minZ:-4.85,maxZ:4.85},new THREE.Vector3(3.5,0,3.5),interactions,initial,save);
   return {id:'home',name:'午后的小屋',note:'家具、热茶和阳光。这是完全属于你的空间。',root,floor,
     spawn:new THREE.Vector3(3.5,0,3.5),camera:'isometric',
-    bounds:{minX:-5.35,maxX:5.35,minZ:-4.85,maxZ:4.85},obstacles,interactions,
+    bounds:{minX:-5.35,maxX:5.35,minZ:-4.85,maxZ:4.85},obstacles,interactions,decoration,
     tick:(time)=>{
       glows.forEach((g,i)=>{g.position.y=1+Math.sin(time*.7+i*1.3)*.28;});
       curls.forEach((c,i)=>{c.position.set(Math.sin(time*1.6+i)*.05,.08+(time*.25+i*.16)%1,0);

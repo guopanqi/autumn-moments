@@ -20,3 +20,11 @@ This project is Autumn Moments, a browser-first Three.js life-world. Read `docs/
 - New interactive objects should implement the existing `Interaction` contract; do not introduce action-specific branches in `World`.
 - Animal ambient update must remain separate from input handling; player input can cause a temporary reaction, not the entire idle motion.
 - Until real browser screenshots are reviewed, describe V0.2 as implemented and build-checked, not visually accepted.
+
+## V0.3 furniture invariants
+
+- Persist furniture as prefab IDs and transforms, never Three.js meshes or scene hierarchy positions.
+- Placement must not overlap static furniture or the player and should leave core interaction approaches reachable.
+- Undo removes both visual geometry and the navigation obstacle, then persists the updated record.
+- Keep the furniture editor room-specific; do not turn every location into the same editor.
+- Keep save v1 migration functioning and treat save JSON as untrusted input.

@@ -12,10 +12,25 @@
     <div id="viewport" aria-label="可交互的三维生活场景"></div>
     <div class="vignette" aria-hidden="true"></div>
     <header class="topbar">
-      <div class="brand"><span class="brand-icon">✺</span><div><strong>秋日片刻</strong><small>AUTUMN MOMENTS · PROTOTYPE 0.2</small></div></div>
+      <div class="brand"><span class="brand-icon">✺</span><div><strong>秋日片刻</strong><small>AUTUMN MOMENTS · PROTOTYPE 0.3</small></div></div>
       <div class="statbar"><div class="stat">☀ <span id="time">09:20</span></div><div class="stat">♡ <span id="mood">70</span></div><div class="stat">◌ <span id="coins">20</span></div></div>
     </header>
     <aside class="placard" aria-live="polite"><span class="eyebrow">你所在的地方</span><h1 id="place-name">街角的小公园</h1><p id="place-note">微风、树影，还有一些值得停留的瞬间。</p></aside>
+    <aside id="decor-panel" class="decor-panel" hidden aria-label="小屋装饰">
+      <h2>布置小屋 <span>MY LITTLE HOME</span></h2>
+      <p>选择一件家具，点击地板摆放。让这里慢慢变成自己的样子。</p>
+      <div class="decor-catalog">
+        <button type="button" data-furniture="plant">✿ <span>绿植</span></button>
+        <button type="button" data-furniture="stool">▤ <span>软凳</span></button>
+        <button type="button" data-furniture="lamp">✧ <span>落地灯</span></button>
+      </div>
+      <div class="decor-actions">
+        <button type="button" id="decor-rotate">↻ 旋转</button>
+        <button type="button" id="decor-undo">撤销上一件</button>
+        <button type="button" id="decor-cancel">退出</button>
+      </div>
+      <small id="decor-status">选择一件家具，再点击地板放置。</small>
+    </aside>
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <div id="hint" class="interaction-hint" aria-live="polite"></div>
     <div class="bottom-bar"><div class="instructions"><b>WASD / 方向键</b> 行走 <span>·</span> <b>点击地面</b> 前往 <span>·</span> <b>点击物体</b> 互动 <span>·</span> <b>滚轮</b> 室内缩放</div><div class="location-buttons"><button id="go-park" class="place-button active" type="button">☘ 公园</button><button id="go-home" class="place-button" type="button">⌂ 小屋</button></div></div>

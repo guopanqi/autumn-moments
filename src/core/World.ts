@@ -6,14 +6,22 @@ import {findPath} from './navigation';
 import {createPark} from '../locations/park';
 import {createHome} from '../locations/home';
 import type {Interaction,Location,PlaceId,Effect} from './types';
+import {validFurniture,isFurnitureKind,type PlacedFurniture} from '../decor/furniture';
 
-type SavedState={mood:number;coins:number;place:PlaceId};
-const SAVE_KEY='autumn-moments:v1';
+type SavedState={mood:number;coins:number;place:PlaceId;furniture:PlacedFurniture[]};
+const SAVE_KEY='autumn-moments:v2';
 function load():SavedState{
-  try{const raw=localStorage.getItem(SAVE_KEY);if(raw){const saved=JSON.parse(raw) as SavedState;
-    if(typeof saved.mood==='number'&&typeof saved.coins==='number'&&(saved.place==='park'||saved.place==='home'))return saved;}}
-  catch{/* Save data may be absent or incompatible. */}
-  return {mood:70,coins:20,place:'park'};
+  try{
+    const raw=localStorage.getItem(SAVE_KEY)??localStorage.getItem('autumn-moments:v1');
+    if(raw){
+      const saved=JSON.parse(raw) as Partial<SavedState>;
+      if(Number.isFinite(saved.mood)&&Number.isFinite(saved.coins)&&(saved.place==='park'||saved.place==='home')){
+        return {mood:clamp(saved.mood!,0,100),coins:Math.max(0,saved.coins!),place:saved.place,
+          furniture:Array.isArray(saved.furniture)?saved.furniture.filter(validFurniture).slice(0,50):[]};
+      }
+    }
+  }catch{/* Save data may be absent or incompatible. */}
+  return {mood:70,coins:20,place:'park',furniture:[]};
 }
 function clamp(v:number,a:number,b:number){return Math.min(b,Math.max(a,v));}
 
@@ -60,7 +68,8 @@ export class World {
     this.scene.add(this.actor.group);
     const ring=new THREE.Mesh(new THREE.RingGeometry(.57,.66,40),new THREE.MeshBasicMaterial({color:'#f2dfae',side:THREE.DoubleSide,transparent:true,opacity:.72,depthWrite:false}));
     ring.rotation.x=-Math.PI/2;ring.position.y=.065;ring.visible=false;this.scene.add(ring);this.halo=ring;
-    this.places.set('park',createPark());this.places.set('home',createHome());
+    this.places.set('park',createPark());
+    this.places.set('home',createHome(this.saved.furniture,items=>{this.saved.furniture=items;this.save();}));
     this.switchPlace(this.saved.place);
     this.bindControls(container);
     window.addEventListener('resize',()=>this.resize(container));
@@ -73,7 +82,7 @@ export class World {
     this.camera.resize(container.clientWidth,container.clientHeight);
   }
   switchPlace(id:PlaceId){
-    if(this.active)this.scene.remove(this.active.root);
+    if(this.active){this.active.decoration?.cancel();this.scene.remove(this.active.root);}
     this.active=this.places.get(id)!;
     this.scene.add(this.active.root);
     this.actor.teleport(this.active.spawn);
@@ -82,6 +91,7 @@ export class World {
     document.getElementById('place-name')!.textContent=this.active.name;
     document.getElementById('place-note')!.textContent=this.active.note;
     document.querySelectorAll<HTMLButtonElement>('.place-button').forEach(btn=>btn.classList.toggle('active',btn.id==='go-'+id));
+    const panel=document.getElementById('decor-panel');if(panel)panel.hidden=id!=='home';
     this.setHover(null);this.renderHUD();
   }
   private transitionTo(id:PlaceId){
@@ -101,6 +111,10 @@ export class World {
   }
   private bindControls(container:HTMLElement){
     window.addEventListener('keydown',(e)=>{
+      if(this.active.decoration?.isPlacing){
+        if(e.code==='Escape'){e.preventDefault();this.cancelFurniture();return;}
+        if(e.code==='KeyR'){e.preventDefault();this.active.decoration.rotate();return;}
+      }
       if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();
       this.keys.add(e.code);
     });
@@ -112,6 +126,19 @@ export class World {
     container.addEventListener('wheel',(e)=>{if(this.active.camera==='isometric'){e.preventDefault();this.camera.zoom(e.deltaY*.013);}}, {passive:false});
     document.getElementById('go-park')?.addEventListener('click',()=>this.transitionTo('park'));
     document.getElementById('go-home')?.addEventListener('click',()=>this.transitionTo('home'));
+    document.querySelectorAll<HTMLButtonElement>('[data-furniture]').forEach(btn=>btn.addEventListener('click',()=>{
+      const kind=btn.dataset.furniture;
+      if(this.active.decoration&&isFurnitureKind(kind)){
+        this.active.decoration.begin(kind);
+        this.updateFurnitureHint('移动鼠标选择空地，点击摆放。按 R 旋转。');
+        this.actor.cancel();this.setHover(null);
+      }
+    }));
+    document.getElementById('decor-rotate')?.addEventListener('click',()=>this.active.decoration?.rotate());
+    document.getElementById('decor-cancel')?.addEventListener('click',()=>this.cancelFurniture());
+    document.getElementById('decor-undo')?.addEventListener('click',()=>{
+      const result=this.active.decoration?.undo();this.notify(result?'撤销了最后放置的家具。':'暂时没有可以撤销的家具。');
+    });
     document.querySelectorAll<HTMLButtonElement>('[data-move]').forEach(button=>{
       const dir=button.dataset.move!;
       const start=(e:PointerEvent)=>{e.preventDefault();button.setPointerCapture(e.pointerId);this.mobileKeys.add(dir);};
@@ -122,6 +149,8 @@ export class World {
       button.addEventListener('lostpointercapture',()=>this.mobileKeys.delete(dir));
     });
   }
+  private updateFurnitureHint(message:string){const text=document.getElementById('decor-status');if(text)text.textContent=message;}
+  private cancelFurniture(){this.active.decoration?.cancel();this.updateFurnitureHint('选择一件家具，再点击地板放置。');}
   private setHover(hit:Interaction|null){
     this.hovered=hit;this.halo.visible=!!hit;
     if(hit){this.halo.position.x=hit.approach.x;this.halo.position.z=hit.approach.z;}
@@ -135,6 +164,19 @@ export class World {
     const bounds=this.renderer.domElement.getBoundingClientRect();
     this.pointer.set((e.clientX-bounds.left)/bounds.width*2-1,-(e.clientY-bounds.top)/bounds.height*2+1);
     this.raycaster.setFromCamera(this.pointer,this.camera.active);
+    const decor=this.active.decoration;
+    if(decor?.isPlacing){
+      const floor=this.raycaster.intersectObject(this.active.floor,false)[0];
+      if(floor){
+        decor.hover(floor.point,this.actor.position);
+        if(activate){
+          const result=decor.place(this.actor.position);
+          this.notify(result.message);
+          if(result.ok)this.updateFurnitureHint('摆好了！可以再选择一件家具。');
+        }
+      }
+      return;
+    }
     const roots=this.active.interactions.map(x=>x.root);
     const hits=this.raycaster.intersectObjects(roots,true);
     let hit:Interaction|null=null;

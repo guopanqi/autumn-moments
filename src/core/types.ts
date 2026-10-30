@@ -1,4 +1,5 @@
 import type * as THREE from 'three';
+import type {HomeDecoration} from '../decor/furniture';
 export type PlaceId = 'park' | 'home';
 export type CameraMode = 'follow' | 'isometric';
 export type Obstacle = { x:number; z:number; r:number };
@@ -15,4 +16,5 @@ export interface Location {
   spawn:THREE.Vector3; camera:CameraMode;
   interactions:Interaction[];
   tick:(elapsed:number,dt:number,player:THREE.Vector3)=>void;
+  decoration?:HomeDecoration;
 }
