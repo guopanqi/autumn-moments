@@ -77,3 +77,7 @@ The first pet now communicates intentions through gait, lowered head for sniffin
 
 ## Puppy fetch gesture study (V0.6b)
 The single warm-coral toy is readable in three phases: on a low rack, briefly in a parabolic throw, then by the dog's muzzle during its return. Pause at the moment of collection before the return; avoid treating this first procedural pass as a finished skeletal throw/fetch animation. Human visual and touch review are still open.
+
+
+### V0.6b visual review adjustment
+Chromium screenshot showed the original 1.65-unit toy instruction sign blocking the character and central long view. The physical prop now has only a low rack, a coral ball and a transparent 3D touch volume. Text appears through the existing hover interaction hint; visual balance and mobile touch remain for human evaluation.

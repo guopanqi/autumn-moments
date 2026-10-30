@@ -156,3 +156,5 @@ V0.5 的“工作”只是一项公园内可重复的短动作，尚无工作日
 - [x] 正常互动中断与移动途中取消都能清理临时目标冻结，不再依靠 15 秒超时；抚摸可以中断捡球并使玩具恢复。
 - [ ] 用户实机判断：球和小狗的移动节奏是否自然、大小是否可读、有无碰撞穿插、动作是否真的有情绪价值。
 - [ ] 本阶段没有新地点、背包/道具系统、全局 AI 或复杂小游戏。
+
+- [x] Visual screenshot follow-up: replaced the oversized ball sign with an unobtrusive rack and transparent touch target; added a regression asserting that a pet request restores the toy even during a fetch.

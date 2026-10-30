@@ -124,7 +124,11 @@ export function createPark(initialDogBond=0,saveDogBond:(bond:number)=>void=()=>
   const toyRack=new THREE.Group();toyRack.name='Puppy ball rack';toyRack.position.set(4.1,0,4.7);
   toyRack.add(box(.72,.3,.66,'#ba966f',0,.18,0));
   const toyBall=ball(.2,'#e6a174',0,.55,0,12,9);toyRack.add(toyBall);
-  const toySign=sign('一起玩球',1.65);toySign.position.set(0,1.42,0);toyRack.add(toySign);
+  // In-world object, not another sign blocking the camera. Invisible generous hit
+  // sphere is deliberately separate from the displayed prop for small touch targets.
+  const toyHit=ball(.57,'#ffffff',0,.58,0,10,8);
+  toyHit.material=new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:0,depthWrite:false});
+  toyHit.name='Puppy toy touch target';toyHit.castShadow=false;toyRack.add(toyHit);
   root.add(toyRack);obstacles.push({x:4.1,z:4.7,r:.42});
   interactions.push({
     id:'park-fetch',label:'把球抛给小狗',root:toyRack,

@@ -351,7 +351,7 @@ test('fetch the ball only after the throw cue; dog returns it and retains normal
   const project=async()=>page.evaluate(()=>{
     const w=(window as Window&{__autumnDev?:any}).__autumnDev;
     const rack=w.places.get('park').root.getObjectByName('Puppy ball rack');
-    const point=rack.localToWorld(w.actor.position.clone().set(0,1.42,0));
+    const point=rack.localToWorld(w.actor.position.clone().set(0,.65,0));
     w.camera.active.updateMatrixWorld();point.project(w.camera.active);
     const rect=document.querySelector<HTMLCanvasElement>('#viewport canvas')!.getBoundingClientRect();
     return {x:rect.left+(point.x+1)*rect.width/2,y:rect.top+(1-point.y)*rect.height/2};
@@ -406,4 +406,25 @@ test('cancelling a targeted moving-dog approach immediately releases its hold',a
   });
   expect(result.during).toBeGreaterThan(result.time);
   expect(result.after).toBe(-1);
+});
+
+
+test('pet request interrupts a fetched ball and returns toy to its rack',async({page})=>{
+  await page.goto('./?e2e=1');await expect(page.locator('#loading')).toBeHidden({timeout:15000});
+  const result=await page.evaluate(()=>{
+    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    const park=w.places.get('park'),dog=park.root.getObjectByName('Park puppy').userData.controller;
+    const rack=park.root.getObjectByName('Puppy ball rack');
+    const toy=rack.children.find((c:any)=>c.geometry?.type==='SphereGeometry');
+    toy.visible=false;
+    const callback=()=>{toy.visible=true;};
+    const started=dog.startFetch(w.actor.position.clone(),new w.actor.position.constructor(4.2,0,1.5),
+      new w.actor.position.constructor(3.06,0,4.10),callback);
+    dog.holdForInteraction();
+    return {started,fetching:dog.isFetching,visible:toy.visible,held:dog.heldUntil,time:w.elapsed};
+  });
+  expect(result.started).toBe(true);
+  expect(result.fetching).toBe(false);
+  expect(result.visible).toBe(true);
+  expect(result.held).toBeGreaterThan(result.time);
 });
