@@ -121,3 +121,7 @@ V0.3 已有 `autumn-moments:v2`，保存 `{ mood, coins, place, furniture:[{id,k
 `src/locations/parkExpansion.ts` owns only new outskirts geometry, distant silhouettes, instanced meadow and two optional park interactions. It adds to the existing park root and obstacle list; world save keys, location identity and existing actions are unchanged. The renderer retains one active location; no streaming or ECS. The small prototype A* is used only if a collision-free direct line cannot reach the goal, then its waypoints are string-pulled.
 
 - Expanded forest uses four InstancedMesh draws for repeat tree trunks and 3 canopy layers; avoids a mesh-per-leaf draw-call explosion in software WebGL. Browser smoke checks progress over real frames but does not enforce a hardware frame rate; real-device FPS remains to be measured.
+
+
+## Low-FPS movement correctness
+The original `Math.min(.05,clock.getDelta())` discarded elapsed wall time at low FPS, slowing travel even with correct pathfinding. The render loop now advances up to 250ms in small <=50ms movement/collision/action steps and renders once. This prevents large collision leaps while preserving approximate real-time travel in software WebGL. The daylight shadow map is 1024² with a player-following frustum rather than a giant static map. Test result does not prove production mobile FPS.

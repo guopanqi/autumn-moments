@@ -121,3 +121,8 @@ V0.5 的“工作”只是一项公园内可重复的短动作，尚无工作日
 - [x] Distant ridges, warm long sightlines, grouped tree silhouettes and instanced meadow details; no source or assets copied from Summer Afternoon.
 - [ ] Verify outdoors on actual desktop and phone: navigation, run cadence, camera height, path visual rhythm, real-device FPS, and whether edges feel too empty.
 - [ ] More advanced animation and level-of-detail / occlusion remain optional pending performance measurements.
+
+
+### Browser low-FPS follow-up
+- [x] Investigated slow expanded-neighborhood Chromium screenshot playback. Reduced repeat tree draw calls through instancing and corrected render-time step loss via substepped simulation; retaining performance profiling as an explicit follow-up.
+- [ ] Profile real devices (FPS, draw calls, GPU memory, scene loading) and tune sky/landscape materials using screenshot review; low-FPS headless SwiftShader is not a substitute for hardware benchmarking.

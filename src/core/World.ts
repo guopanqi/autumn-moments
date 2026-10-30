@@ -62,7 +62,7 @@ export class World {
     this.scene.add(new THREE.HemisphereLight('#f6fff5','#d3b891',2.15));
     const sun=new THREE.DirectionalLight('#fff1d2',3.1);
     sun.position.set(-8,18,12);sun.castShadow=true;
-    sun.shadow.mapSize.set(2048,2048);
+    sun.shadow.mapSize.set(1024,1024);
     sun.shadow.camera.left=-19;sun.shadow.camera.right=19;
     sun.shadow.camera.top=19;sun.shadow.camera.bottom=-19;
     sun.shadow.camera.near=.5;sun.shadow.camera.far=60;
@@ -317,7 +317,13 @@ export class World {
     document.getElementById('time')!.textContent=`${String(Math.floor(mins/60)%24).padStart(2,'0')}:${String(mins%60).padStart(2,'0')}`;
   }
   private frame=()=>{
-    const dt=Math.min(.05,this.clock.getDelta());this.elapsed+=dt;
+    // A slow WebGL renderer must not slow down the simulation; advance in safe
+    // <=50ms collision substeps while drawing only once for this display frame.
+    const realDt=Math.min(.25,this.clock.getDelta());
+    const steps=Math.max(1,Math.ceil(realDt/.05));
+    const dt=realDt/steps;
+    for(let step=0;step<steps;step++){
+    this.elapsed+=dt;
     let x=0,z=0;
     if(this.keys.has('KeyA')||this.keys.has('ArrowLeft')||this.mobileKeys.has('left'))x-=1;
     if(this.keys.has('KeyD')||this.keys.has('ArrowRight')||this.mobileKeys.has('right'))x+=1;
@@ -340,12 +346,13 @@ export class World {
     this.actor.update(dt,this.elapsed,moved,running);
     this.active.tick(this.elapsed,dt,this.actor.position);
     this.camera.update(this.actor.position,dt,running);
+    }
     // Shadow detail follows the actor over a larger neighborhood without a giant shadow map.
     const px=Math.round(this.actor.position.x*2)/2,pz=Math.round(this.actor.position.z*2)/2;
     this.sunlight.target.position.set(px,0,pz);
     this.sunlight.position.set(px-10,21,pz+12);
     this.renderer.render(this.scene,this.camera.active);
-    if(this.toastTimer>0){this.toastTimer-=dt;if(this.toastTimer<=0)document.getElementById('toast')?.classList.remove('visible');}
+    if(this.toastTimer>0){this.toastTimer-=realDt;if(this.toastTimer<=0)document.getElementById('toast')?.classList.remove('visible');}
     if(Math.floor(this.elapsed*3)%3===0)this.renderHUD();
     requestAnimationFrame(this.frame);
   };
