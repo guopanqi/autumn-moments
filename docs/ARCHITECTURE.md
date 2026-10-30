@@ -115,3 +115,7 @@ V0.3 已有 `autumn-moments:v2`，保存 `{ mood, coins, place, furniture:[{id,k
 - Click-to-move uses grid A* only when a direct collision-clear segment fails. The returned grid route is string-pulled with circular obstacle clearance; yaw follows its simplified segments, not individual 0.45m cell centers.
 - Walking/running use separate configured speeds and stride cadence; manual run is Shift (touch button), double-clicking ground starts a run-to-point. Outdoor camera stays in a world-oriented 3/4 follow angle for consistent WASD and click projection, with a lower view and a subtle run FOV change. No borrowed Summer Afternoon code.
 - A player-following directional shadow frustum keeps the larger neighborhood within the shadow map; never expand the shadow camera indefinitely to cover all distant meshes.
+
+
+## Expanded park (same Location)
+`src/locations/parkExpansion.ts` owns only new outskirts geometry, distant silhouettes, instanced meadow and two optional park interactions. It adds to the existing park root and obstacle list; world save keys, location identity and existing actions are unchanged. The renderer retains one active location; no streaming or ECS. The small prototype A* is used only if a collision-free direct line cannot reach the goal, then its waypoints are string-pulled.

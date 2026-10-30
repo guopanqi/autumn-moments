@@ -112,3 +112,12 @@ V0.5 的“工作”只是一项公园内可重复的短动作，尚无工作日
 - **玩法**：记录玩家到底重复做什么、为什么做、做完如何变化；只有内容新增不算成功。
 - **技术**：类型检查/构建通过、控制无卡死、刷新保留承诺的数据、不出现额外本地工具依赖。
 - **范围**：每阶段只新增一个关键体验变量，避免全面重写。
+
+
+## Spatial exploration & motion pass / 2026-10-30
+- [x] Diagnosed short-grid waypoint yaw corrections; direct segment bypass, safe string-pull routes and damped heading.
+- [x] Separate Shift (mobile run button) and ground double-click run; gait cadence, body lean and outdoor camera FOV respond to locomotion.
+- [x] Expand the **same outdoor Location** from ~21×16 units of navigable bounds to 70×64 units. Keep the original park/home/earn-and-shop flow in place; add three connected walks, residential edges, flower garden and a pond without creating a new gameplay location.
+- [x] Distant ridges, warm long sightlines, grouped tree silhouettes and instanced meadow details; no source or assets copied from Summer Afternoon.
+- [ ] Verify outdoors on actual desktop and phone: navigation, run cadence, camera height, path visual rhythm, and whether edges feel too empty.
+- [ ] More advanced animation and level-of-detail / occlusion remain optional pending performance measurements.

@@ -59,3 +59,7 @@ V0.1 的动作是临时姿态。不得把临时动画视为“已达到最终演
 - Separate approachable foreground landmarks from far-reaching road silhouettes; lower outdoor camera retains a readable 3/4 character, higher ceiling of sky, trees and distant architecture.
 - Prioritize turning coherence, running cadence, grounded feet and a slightly widening running FOV over expensive bloom/shader stacks; retain existing warm diorama color language.
 - Desktop and mobile comparison must evaluate actual perspective, navigation, perceived depth, and animation. Automated screenshots are review artifacts, not visual acceptance.
+
+
+## The extended neighborhood is not an enormous generic plane
+The original park is still the recognizable center; the new curving walks lead toward residential roofs, a flower pergola and water. Long views have foreground paths, mid-ground landmarks and a pale distant ridge. Details in peripheral grass use InstancedMesh (one mesh per category), while focal objects retain distinct meshes. Keep the warm diorama palette: Summer Afternoon is a reference for *spatial rhythm and locomotion*, not a mandate to use its exact shaders or assets.

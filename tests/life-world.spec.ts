@@ -226,3 +226,31 @@ test('direct route is simplified and running has a separate movement speed',asyn
  const route=await page.evaluate(()=>{const w=(window as Window&{__autumnDev?:any}).__autumnDev;return w.actor.path.length;});
  expect(route).toBe(1);
 });
+
+
+test('neighborhood extends beyond the first park and retains navigable outdoor paths',async({page},testInfo)=>{
+  await page.goto('./?e2e=1');await expect(page.locator('#loading')).toBeHidden({timeout:15000});
+  const info=await page.evaluate(()=>{
+    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    const park=w.places.get('park');
+    const bounds=park.bounds;
+    const instanced=park.root.getObjectByName('Neighborhood · winding walks, meadow, water and houses');
+    return {bounds,hasOutskirts:!!instanced,landmarks:park.interactions.map((i:any)=>i.id)};
+  });
+  expect(info.bounds.maxX-info.bounds.minX).toBeGreaterThan(65);
+  expect(info.bounds.maxZ-info.bounds.minZ).toBeGreaterThan(60);
+  expect(info.hasOutskirts).toBe(true);
+  expect(info.landmarks).toContain('park-view');expect(info.landmarks).toContain('park-garden');
+  const result=await page.evaluate(()=>{
+    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    w.moveTo(w.actor.position.clone().set(20,0,16));
+    return {waypoints:w.actor.path.length,moving:w.actor.isMoving};
+  });
+  expect(result.moving).toBe(true);
+  expect(result.waypoints).toBeLessThan(30);
+  await page.waitForTimeout(2200);
+  const moved=await page.evaluate(()=>{const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    return {x:w.actor.position.x,z:w.actor.position.z};});
+  expect(Math.hypot(moved.x+.4,moved.z-4.6)).toBeGreaterThan(2.5);
+  await page.screenshot({path:testInfo.outputPath('expanded-neighborhood.png')});
+});

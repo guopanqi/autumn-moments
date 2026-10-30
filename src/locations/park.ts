@@ -3,6 +3,7 @@ import {art} from '../art/style';
 import {add,ball,box,cone,cylinder,ground,matte,oval,rand,sign} from '../core/geo';
 import type {Location,Interaction,Obstacle} from '../core/types';
 import {ParkDog} from '../actors/dog';
+import {extendPark} from './parkExpansion';
 
 function tree(x:number,z:number,scale=1,autumn=false){
   const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(scale);
@@ -122,11 +123,12 @@ export function createPark():Location{
     const leaf=ball(.06,i%2?'#d6b079':'#e4c88a',(rng()-.5)*21,1.2+rng()*5,(rng()-.5)*14,6,5);
     leaf.castShadow=false;root.add(leaf);return leaf;
   });
+  const tickOutskirts=extendPark(root,obstacles,interactions);
   return {id:'park',name:'街角的小公园',note:'微风、树影，还有一些值得停留的瞬间。',root,floor,
-    bounds:{minX:-10.5,maxX:10.5,minZ:-8.4,maxZ:7.2},obstacles,
+    bounds:{minX:-35,maxX:35,minZ:-32,maxZ:32},obstacles,
     spawn:new THREE.Vector3(-.4,0,4.6),camera:'follow',interactions,
     tick:(time,dt,player)=>{
-      dog.tick(time,dt,player);
+      dog.tick(time,dt,player);tickOutskirts(time);
       leafs.forEach((leaf,i)=>{leaf.position.x+=Math.sin(time*.6+i)*.0015;leaf.position.y=2+Math.sin(time*.8+i*1.7)*.35;});
     }};
 }

@@ -78,3 +78,6 @@ Three.js + TypeScript + Vite；代码生成场景/道具；不需要后端。开
 ### V0.5 最小经济循环
 
 在公园点击「整理花坛」工作台，角色走近并完成动作后获得 12 金币、心情 -2。回家打开「布置小屋」，先购买绿植（16）、软凳（24）或落地灯（32），再选择摆放；放回家具会使库存重新可用，购买并不会在每次摆放时重复扣款。金币、库存、布局保存在浏览器 localStorage（v3，自动兼容旧 v1/v2）。当前不支持出售，也不代表已完成工作小游戏。
+
+### Exploring the enlarged neighborhood
+Outdoor park paths now continue into a small neighborhood with a village road, flower garden, distant houses and a pond. WASD walks, holding Shift runs, and double-clicking the ground runs toward a point. The home remains an isometric room with the same decoration and earnings. This is one expanded outdoor scene, **not** three new locations. Summer Afternoon is a visual study only; its source is proprietary.

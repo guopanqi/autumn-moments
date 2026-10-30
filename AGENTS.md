@@ -43,3 +43,10 @@ This project is Autumn Moments, a browser-first Three.js life-world. Read `docs/
 - Derived stock = owned - number of placed furniture of that kind; edit/undo/redo never changes owned count or spends/refunds coins.
 - Existing v1/v2 placed furniture migrates to owned status; preserve coins and mood. Keep v3 saves consistent on reload.
 - Browser tests cover the actual earn-buy-place flow; CI/browser tests do not replace mobile touch or visual approval.
+
+
+## Summer Afternoon reference / park expansion
+- Summer Afternoon source is explicitly **not open source**. Do not copy its JS, shaders, models or textures. Only independently implement observable mood and interaction principles.
+- Keep the original park/home anchor, work reward and save inventory semantics stable while expanding the same outdoor location.
+- Avoid per-grass Mesh objects: instanced decorative details and clear collision boundaries. New navigation edges must be tested.
+- Watch for heading oscillation; do not regress to grid-cell-by-grid-cell yaw. Human evaluation of running and scene richness remains necessary after CI.
