@@ -36,3 +36,10 @@ This project is Autumn Moments, a browser-first Three.js life-world. Read `docs/
 - Cancel an uncommitted move before leaving the room; restore the original group and navigation obstacle.
 - All placement, moving, rotation, removal, undo, redo paths must persist the latest placement snapshot. Undo/redo history is session-only.
 - New UI controls must not intercept ordinary click-to-walk outside of the decoration panel.
+
+## V0.5 economic invariants
+- Wages use the existing action moment cue; cancellation before cue never grants money.
+- Purchase subtracts the fixed price exactly once and increments owned count; placement is free but requires unplaced owned stock.
+- Derived stock = owned - number of placed furniture of that kind; edit/undo/redo never changes owned count or spends/refunds coins.
+- Existing v1/v2 placed furniture migrates to owned status; preserve coins and mood. Keep v3 saves consistent on reload.
+- Browser tests cover the actual earn-buy-place flow; CI/browser tests do not replace mobile touch or visual approval.

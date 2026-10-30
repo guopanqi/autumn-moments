@@ -6,22 +6,24 @@ import {findPath} from './navigation';
 import {createPark} from '../locations/park';
 import {createHome} from '../locations/home';
 import type {Interaction,Location,PlaceId,Effect} from './types';
-import {validFurniture,isFurnitureKind,type PlacedFurniture} from '../decor/furniture';
+import {validFurniture,isFurnitureKind,FURNITURE_KINDS,FURNITURE_PRICES,FURNITURE_LABELS,normalizeOwned,ownedForExisting,
+  type FurnitureOwned,type FurnitureKind,type PlacedFurniture} from '../decor/furniture';
 
-type SavedState={mood:number;coins:number;place:PlaceId;furniture:PlacedFurniture[]};
-const SAVE_KEY='autumn-moments:v2';
+type SavedState={mood:number;coins:number;place:PlaceId;furniture:PlacedFurniture[];owned:FurnitureOwned};
+const SAVE_KEY='autumn-moments:v3';
 function load():SavedState{
   try{
-    const raw=localStorage.getItem(SAVE_KEY)??localStorage.getItem('autumn-moments:v1');
+    const raw=localStorage.getItem(SAVE_KEY)??localStorage.getItem('autumn-moments:v2')??localStorage.getItem('autumn-moments:v1');
     if(raw){
       const saved=JSON.parse(raw) as Partial<SavedState>;
       if(Number.isFinite(saved.mood)&&Number.isFinite(saved.coins)&&(saved.place==='park'||saved.place==='home')){
-        return {mood:clamp(saved.mood!,0,100),coins:Math.max(0,saved.coins!),place:saved.place,
-          furniture:Array.isArray(saved.furniture)?saved.furniture.filter(validFurniture).slice(0,50):[]};
+        const furniture=Array.isArray(saved.furniture)?saved.furniture.filter(validFurniture).slice(0,35):[];
+        return {mood:clamp(saved.mood!,0,100),coins:Math.max(0,Math.floor(saved.coins!)),place:saved.place,
+          furniture,owned:normalizeOwned(saved.owned,furniture)};
       }
     }
   }catch{/* Save data may be absent or incompatible. */}
-  return {mood:70,coins:20,place:'park',furniture:[]};
+  return {mood:70,coins:20,place:'park',furniture:[],owned:ownedForExisting([])};
 }
 function clamp(v:number,a:number,b:number){return Math.min(b,Math.max(a,v));}
 
@@ -69,7 +71,13 @@ export class World {
     const ring=new THREE.Mesh(new THREE.RingGeometry(.57,.66,40),new THREE.MeshBasicMaterial({color:'#f2dfae',side:THREE.DoubleSide,transparent:true,opacity:.72,depthWrite:false}));
     ring.rotation.x=-Math.PI/2;ring.position.y=.065;ring.visible=false;this.scene.add(ring);this.halo=ring;
     this.places.set('park',createPark());
-    this.places.set('home',createHome(this.saved.furniture,items=>{this.saved.furniture=items;this.save();}));
+    this.places.set('home',createHome(this.saved.furniture,items=>{
+      this.saved.furniture=items;this.save();this.renderCatalog();
+    },kind=>this.available(kind)>0));
+    // Reject spatially invalid legacy furniture without losing ownership of valid pieces.
+    const accepted=this.places.get('home')!.decoration!.placed.map(p=>({...p}));
+    this.saved.furniture=accepted;
+    this.saved.owned=normalizeOwned(this.saved.owned,accepted);
     this.switchPlace(this.saved.place);
     this.bindControls(container);
     window.addEventListener('resize',()=>this.resize(container));
@@ -93,7 +101,7 @@ export class World {
     document.querySelectorAll<HTMLButtonElement>('.place-button').forEach(btn=>btn.classList.toggle('active',btn.id==='go-'+id));
     this.closeFurniturePanel();
     const toggle=document.getElementById('decor-toggle');if(toggle)toggle.hidden=id!=='home';
-    this.setHover(null);this.renderHUD();
+    this.setHover(null);this.renderHUD();this.renderCatalog();
   }
   private transitionTo(id:PlaceId){
     if(this.transitioning||id===this.active.id)return;
@@ -141,10 +149,13 @@ export class World {
     document.querySelectorAll<HTMLButtonElement>('[data-furniture]').forEach(btn=>btn.addEventListener('click',()=>{
       const kind=btn.dataset.furniture;
       if(this.active.decoration&&isFurnitureKind(kind)){
-        this.active.decoration.begin(kind);
+        if(!this.active.decoration.begin(kind)){this.notify('这件家具没有可用库存，请先购买。');return;}
         this.updateFurnitureHint('移动鼠标选择空地，点击摆放。按 R 旋转。');
         this.actor.cancel();this.setHover(null);
       }
+    }));
+    document.querySelectorAll<HTMLButtonElement>('[data-buy]').forEach(btn=>btn.addEventListener('click',()=>{
+      const kind=btn.dataset.buy;if(isFurnitureKind(kind))this.buyFurniture(kind);
     }));
     document.getElementById('decor-rotate')?.addEventListener('click',()=>{
       const decor=this.active.decoration;
@@ -176,6 +187,29 @@ export class World {
       button.addEventListener('pointercancel',end);
       button.addEventListener('lostpointercapture',()=>this.mobileKeys.delete(dir));
     });
+  }
+  private available(kind:FurnitureKind){
+    const placed=this.places.get('home')?.decoration?.placed.filter(p=>p.kind===kind).length??0;
+    return Math.max(0,this.saved.owned[kind]-placed);
+  }
+  private renderCatalog(){
+    for(const kind of FURNITURE_KINDS){
+      const stock=this.available(kind),price=FURNITURE_PRICES[kind];
+      const place=document.querySelector<HTMLButtonElement>(`[data-furniture="${kind}"]`);
+      if(place){place.disabled=stock===0;const count=place.querySelector<HTMLElement>('[data-stock]');
+        if(count)count.textContent=`可摆 ${stock}`;}
+      const buy=document.querySelector<HTMLButtonElement>(`[data-buy="${kind}"]`);
+      if(buy)buy.disabled=this.saved.coins<price||Object.values(this.saved.owned).reduce((a,b)=>a+b,0)>=35;
+    }
+  }
+  private buyFurniture(kind:FurnitureKind){
+    if(this.active.id!=='home')return;
+    const cost=FURNITURE_PRICES[kind];
+    if(this.saved.coins<cost){this.notify('金币不够。去公园帮忙整理花坛可以赚取报酬。');return;}
+    if(Object.values(this.saved.owned).reduce((a,b)=>a+b,0)>=35){this.notify('家具库存已经满了。');return;}
+    this.saved.coins-=cost;this.saved.owned[kind]++;
+    this.save();this.renderHUD();this.renderCatalog();
+    this.notify(`买到了${FURNITURE_LABELS[kind]}，花费 ${cost} 金币。点击「摆放」布置房间。`);
   }
   private closeFurniturePanel(){
     this.active.decoration?.clearSelection();this.updateFurnitureHint('点击已放置的家具选择；也可以添加新的家具。');
@@ -258,7 +292,7 @@ export class World {
     if(effect.travel){this.transitionTo(effect.travel);return;}
     this.saved.mood=clamp(this.saved.mood+(effect.mood??0),0,100);
     this.saved.coins=Math.max(0,this.saved.coins+(effect.coins??0));
-    this.notify(effect.message);this.save();this.renderHUD();this.chime();
+    this.notify(effect.message);this.save();this.renderHUD();this.renderCatalog();this.chime();
   }
   private chime(){
     try{const Ctx=window.AudioContext;if(!Ctx)return;const ctx=new Ctx();

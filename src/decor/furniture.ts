@@ -5,6 +5,25 @@ import type {Bounds,Obstacle,Interaction} from '../core/types';
 
 export type FurnitureKind='plant'|'stool'|'lamp';
 export type PlacedFurniture={id:string;kind:FurnitureKind;x:number;z:number;rotation:number};
+export const FURNITURE_PRICES:Record<FurnitureKind,number>={plant:16,stool:24,lamp:32};
+export const FURNITURE_LABELS:Record<FurnitureKind,string>={plant:'绿植',stool:'软凳',lamp:'落地灯'};
+export const FURNITURE_KINDS:readonly FurnitureKind[]=['plant','stool','lamp'];
+export type FurnitureOwned=Record<FurnitureKind,number>;
+export const emptyOwned=():FurnitureOwned=>({plant:0,stool:0,lamp:0});
+export function ownedForExisting(items:PlacedFurniture[]):FurnitureOwned{
+ const owned=emptyOwned();for(const p of items)owned[p.kind]++;return owned;
+}
+export function normalizeOwned(input:unknown,placed:PlacedFurniture[]):FurnitureOwned{
+ const owned=ownedForExisting(placed);
+ if(input&&typeof input==='object'){
+   const obj=input as Record<string,unknown>;
+   for(const kind of FURNITURE_KINDS){
+     const n=obj[kind];
+     if(typeof n==='number'&&Number.isSafeInteger(n)&&n>=0&&n<=100)owned[kind]=Math.max(owned[kind],n);
+   }
+ }
+ return owned;
+}
 const KINDS:FurnitureKind[]=['plant','stool','lamp'];
 const RADIUS:Record<FurnitureKind,number>={plant:.48,stool:.60,lamp:.45};
 export const isFurnitureKind=(v:unknown):v is FurnitureKind=>typeof v==='string'&&KINDS.includes(v as FurnitureKind);
@@ -64,6 +83,7 @@ export class HomeDecoration {
     private readonly interactions:Interaction[],
     initial:PlacedFurniture[],
     private readonly persist:(items:PlacedFurniture[])=>void,
+    private readonly canPlaceNew:(kind:FurnitureKind)=>boolean=()=>true,
   ){
     // A malformed save must not block an essential interaction or an exit.
     for(const item of initial.slice(0,35)){
@@ -97,7 +117,7 @@ export class HomeDecoration {
   private refreshSelection(){
     for(const [id,entry] of this.entries)entry.ring.visible=id===this.selected;
   }
-  begin(kind:FurnitureKind){this.openPreview(kind,null);}
+  begin(kind:FurnitureKind){if(!this.canPlaceNew(kind))return false;this.openPreview(kind,null);return true;}
   beginMove():boolean{
     if(!this.selected)return false;
     const original=this.placed.find(p=>p.id===this.selected);
@@ -154,6 +174,7 @@ export class HomeDecoration {
     if(!this.chosen||!this.hoverPoint)return{ok:false,message:'先选择家具，再点击地板上的位置。'};
     const {x,z}=this.hoverPoint,kind=this.chosen,id=this.editingId;
     if(!id&&this.placed.length>=35)return{ok:false,message:'房间暂时放不下更多家具。'};
+    if(!id&&!this.canPlaceNew(kind))return{ok:false,message:'没有可用库存，请先购买这件家具。'};
     if(!this.validDestination(kind,x,z,player,id))return{ok:false,message:'这里会挡住家具、人物或通道，换个位置试试。'};
     if(id){
       const p=this.placed.find(p=>p.id===id);

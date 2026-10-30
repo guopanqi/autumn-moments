@@ -101,3 +101,11 @@ V0.3 已有 `autumn-moments:v2`，保存 `{ mood, coins, place, furniture:[{id,k
 ## 浏览器级回归测试
 
 `tests/life-world.spec.ts` 使用 Playwright/Chromium 检查入口、相机视图切换和家具持久化。测试只在 `?e2e=1` 网址中借用 World 实例将世界坐标投影到真实点击坐标，避免只调用内部布置 API 而没有测试交互控件。截图是 CI 的检查材料，不能代替人工视觉判断。
+
+
+## V0.5 最小生活经济（已实现）
+- 收入走现有 `Interaction → action cue → Effect.coins → save`，不创建新地点、任务表或通用经济系统。
+- 购买家具在家中的明确按钮确认后，一次性扣金币并增加 `owned[kind]`；购买不等于摆放，不能通过直接选择预设绕过库存。
+- `stock[kind] = owned[kind] - placed.filter(kind).length`。移动、旋转、收起和撤销/重做只更新布局；所有权不重复变更。库存推导而不是独立保存，因此刷新后不会不同步。
+- `autumn-moments:v3` 保存 mood/coins/place/furniture/owned，兼容 v1/v2；旧已摆放的家具自动计入已拥有，空间非法的旧摆件会被拒绝渲染而不会产生免费复制。
+- 当前公园短时整理可重复，尚无体力、工资周期或完整工作策略；明确留作玩法后续设计。移动端触控及美术仍需人工验证。

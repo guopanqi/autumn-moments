@@ -98,6 +98,17 @@ export function createPark():Location{
   const gate=sign('回家 · HOME',2.5);gate.position.set(5.8,1.65,-5.6);gate.rotation.y=-.15;
   root.add(gate);root.add(cylinder(.08,.1,2.3,'#9a816d',5.8,1.12,-5.61));
   interactions.push({id:'home-door',label:'回到小屋',root:gate,approach:new THREE.Vector3(5.45,0,-4.6),use:()=>({message:'沿着熟悉的小路回家。',travel:'home'})});
+  // V0.5: a paid bit of neighborhood work reuses the existing timed action / Effect.coins.
+  const work=new THREE.Group();work.position.set(-2.75,0,2.55);
+  work.add(box(.82,.46,.62,'#bf9674',0,.23,0));
+  work.add(box(.68,.08,.50,'#d7b994',0,.51,0));
+  work.add(cylinder(.085,.085,1.55,'#9b785e',.48,.83,0,8));
+  work.add(box(.5,.09,.19,'#91a787',.48,.10,0));
+  const notice=sign('整理花坛 · +12',2.15);notice.position.set(0,1.63,0);work.add(notice);
+  root.add(work);obstacles.push({x:-2.75,z:2.55,r:.56});
+  interactions.push({id:'park-work',label:'帮忙整理花坛 · 报酬 12',root:work,
+    approach:new THREE.Vector3(-2.75,0,3.55),
+    use:()=>({message:'花坛整理好了，收到 12 枚工资。',coins:12,mood:-2,gesture:'pet'})});
   const dog=new ParkDog(2.1,2.2);root.add(dog.root);
   interactions.push({id:'park-dog',label:'摸摸小狗',root:dog.root,approach:new THREE.Vector3(1.6,0,2.6),use:()=>({message:'它开心地摇起尾巴，靠着你的手不肯离开。',mood:6,gesture:'pet'}),onMoment:()=>dog.celebrate()});
   const rest=bench(-1.5,-6.4,.26);root.add(rest);

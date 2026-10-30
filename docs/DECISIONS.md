@@ -61,3 +61,7 @@
 ## V0.4 — Edit committed furniture, not duplicated prefabs
 
 Keep one stable furniture ID through reposition/rotation. Editing uses a translucent independent preview, hides the old mesh temporarily, and updates the old navigation obstacle only at commit. A cancel restores the original mesh. Validations run on both preview and commit and temporarily exclude the selected object's prior obstacle. Snapshot-based undo/redo is scoped to one room and only persists final furniture data; it does not expand the global save schema.
+
+
+## V0.5 — Minimum paid work → owned furniture → room placement
+公园现有场景中添加一项整理花坛的付酬短动作，沿用 `Effect.coins` 的动作 cue 结算；不把办公室系统、任务框架或新地点提前引入。小屋保持三种固定价格的预设，购买增加 `owned`，布置占用 `owned - placed`，收起、撤销与重做仅影响 `placed`。升级 v3 存档兼容 v1/v2 已摆放免费家具。当前工作任务重复且低策略性是刻意的 V0.5 非目标；手机交互及审美判断依旧人工验收。

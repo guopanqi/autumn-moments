@@ -12,7 +12,7 @@
     <div id="viewport" aria-label="可交互的三维生活场景"></div>
     <div class="vignette" aria-hidden="true"></div>
     <header class="topbar">
-      <div class="brand"><span class="brand-icon">✺</span><div><strong>秋日片刻</strong><small>AUTUMN MOMENTS · PROTOTYPE 0.4</small></div></div>
+      <div class="brand"><span class="brand-icon">✺</span><div><strong>秋日片刻</strong><small>AUTUMN MOMENTS · PROTOTYPE 0.5</small></div></div>
       <div class="statbar"><div class="stat">☀ <span id="time">09:20</span></div><div class="stat">♡ <span id="mood">70</span></div><div class="stat">◌ <span id="coins">20</span></div></div>
     </header>
     <aside class="placard" aria-live="polite"><span class="eyebrow">你所在的地方</span><h1 id="place-name">街角的小公园</h1><p id="place-note">微风、树影，还有一些值得停留的瞬间。</p></aside>
@@ -20,11 +20,11 @@
     <aside id="decor-panel" class="decor-panel" hidden aria-label="小屋装饰">
       <h2>布置小屋 <span>MY LITTLE HOME</span></h2>
       <button type="button" class="decor-close" id="decor-close" aria-label="关闭布置面板">×</button>
-      <p>点击已有家具选择并移动；或选择新的家具摆放。所有改动都可以撤销。</p>
+      <p>先用金币购买家具，再布置房间。收起家具会重新变为可用库存。</p>
       <div class="decor-catalog">
-        <button type="button" data-furniture="plant">✿ <span>绿植</span></button>
-        <button type="button" data-furniture="stool">▤ <span>软凳</span></button>
-        <button type="button" data-furniture="lamp">✧ <span>落地灯</span></button>
+        <div class="decor-item"><span>✿ 绿植</span><button type="button" data-buy="plant">购买 · 16 金币</button><button type="button" data-furniture="plant" disabled>摆放 · <span data-stock>可摆 0</span></button></div>
+        <div class="decor-item"><span>▤ 软凳</span><button type="button" data-buy="stool">购买 · 24 金币</button><button type="button" data-furniture="stool" disabled>摆放 · <span data-stock>可摆 0</span></button></div>
+        <div class="decor-item"><span>✧ 落地灯</span><button type="button" data-buy="lamp">购买 · 32 金币</button><button type="button" data-furniture="lamp" disabled>摆放 · <span data-stock>可摆 0</span></button></div>
       </div>
       <div class="decor-actions">
         <button type="button" id="decor-move">移动选中</button>
