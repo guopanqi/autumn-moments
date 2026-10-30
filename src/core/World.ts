@@ -91,7 +91,8 @@ export class World {
     document.getElementById('place-name')!.textContent=this.active.name;
     document.getElementById('place-note')!.textContent=this.active.note;
     document.querySelectorAll<HTMLButtonElement>('.place-button').forEach(btn=>btn.classList.toggle('active',btn.id==='go-'+id));
-    const panel=document.getElementById('decor-panel');if(panel)panel.hidden=id!=='home';
+    this.closeFurniturePanel();
+    const toggle=document.getElementById('decor-toggle');if(toggle)toggle.hidden=id!=='home';
     this.setHover(null);this.renderHUD();
   }
   private transitionTo(id:PlaceId){
@@ -126,6 +127,14 @@ export class World {
     container.addEventListener('wheel',(e)=>{if(this.active.camera==='isometric'){e.preventDefault();this.camera.zoom(e.deltaY*.013);}}, {passive:false});
     document.getElementById('go-park')?.addEventListener('click',()=>this.transitionTo('park'));
     document.getElementById('go-home')?.addEventListener('click',()=>this.transitionTo('home'));
+    document.getElementById('decor-toggle')?.addEventListener('click',()=>{
+      const panel=document.getElementById('decor-panel');
+      if(panel&&this.active.id==='home'){
+        panel.hidden=false;
+        const toggle=document.getElementById('decor-toggle');if(toggle)toggle.hidden=true;
+      }
+    });
+    document.getElementById('decor-close')?.addEventListener('click',()=>this.closeFurniturePanel());
     document.querySelectorAll<HTMLButtonElement>('[data-furniture]').forEach(btn=>btn.addEventListener('click',()=>{
       const kind=btn.dataset.furniture;
       if(this.active.decoration&&isFurnitureKind(kind)){
@@ -148,6 +157,11 @@ export class World {
       button.addEventListener('pointercancel',end);
       button.addEventListener('lostpointercapture',()=>this.mobileKeys.delete(dir));
     });
+  }
+  private closeFurniturePanel(){
+    this.cancelFurniture();
+    const panel=document.getElementById('decor-panel');if(panel)panel.hidden=true;
+    const toggle=document.getElementById('decor-toggle');if(toggle)toggle.hidden=this.active.id!=='home';
   }
   private updateFurnitureHint(message:string){const text=document.getElementById('decor-status');if(text)text.textContent=message;}
   private cancelFurniture(){this.active.decoration?.cancel();this.updateFurnitureHint('选择一件家具，再点击地板放置。');}

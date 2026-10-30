@@ -39,7 +39,7 @@
 .decor-panel{position:absolute;z-index:4;right:clamp(16px,3vw,35px);top:115px;width:min(315px,calc(100vw - 30px));padding:17px 18px 15px;border-radius:20px;background:#fff8e9ed;border:1px solid #fffff2;box-shadow:0 13px 38px #69836d2b;backdrop-filter:blur(14px)}
 .decor-panel[hidden]{display:none}
 .decor-panel h2{font-size:15px;font-weight:700;color:#64806e;margin:0 0 7px;display:flex;align-items:baseline;justify-content:space-between}
-.decor-panel h2 span{font-size:8px;font-family:Georgia,serif;letter-spacing:.16em;font-weight:400;color:#9b9b7f}
+.decor-panel h2 span{margin-right:18px;font-size:8px;font-family:Georgia,serif;letter-spacing:.16em;font-weight:400;color:#9b9b7f}
 .decor-panel p{margin:0 0 12px;color:#849185;font-size:11px;line-height:1.7}
 .decor-panel button{font:inherit;cursor:pointer;border:1px solid #e5e5ce;background:#fdf8ee;color:#678271;border-radius:10px;padding:9px 8px;transition:transform .15s,background .15s}
 .decor-panel button:hover,.decor-panel button:focus-visible{background:#e8f0df;transform:translateY(-1px);outline-offset:2px}
@@ -50,3 +50,9 @@
 .decor-actions button{font-size:10px;padding:7px 9px;flex:1}
 .decor-panel small{display:block;font-size:10px;line-height:1.6;margin-top:9px;color:#a18b72}
 @media(max-width:780px){.decor-panel{right:12px;top:142px;width:218px;padding:11px}.decor-panel h2{font-size:12px}.decor-panel h2 span{display:none}.decor-panel p{display:none}.decor-catalog button{font-size:17px;padding:6px 3px}.decor-actions{margin-top:6px}.decor-actions button{font-size:9px;padding:6px 3px}.decor-panel small{font-size:9px}}
+
+.decor-toggle{position:absolute;z-index:4;right:clamp(16px,3vw,35px);top:115px;padding:12px 18px;border-radius:14px;border:1px solid #fffff5;background:#fdf8e8ed;color:#6e8974;box-shadow:0 8px 24px #7b917d20;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;backdrop-filter:blur(10px)}
+.decor-toggle:hover{background:#e7f0dd}
+.decor-toggle[hidden]{display:none}
+.decor-panel .decor-close{position:absolute;top:11px;right:12px;padding:2px 8px;background:transparent;border:0;color:#728879;font-size:22px;line-height:1}
+@media(max-width:780px){.decor-toggle{top:142px;right:12px;padding:11px 13px;font-size:11px}}

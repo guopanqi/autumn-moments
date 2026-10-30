@@ -14,7 +14,7 @@ export class CameraRig {
     this.mode=mode;this.target.copy(focus);
     this.perspective.position.copy(this.desired(focus,'follow'));
     this.orthographic.position.copy(this.desired(focus,'isometric'));
-    this.active.lookAt(this.target.x,this.target.y+.65,this.target.z);
+    this.active.lookAt(this.target.x,this.target.y+(this.mode==='isometric'?1.35:.65),this.target.z);
     this.resize(window.innerWidth,window.innerHeight);
   }
   zoom(d:number){if(this.mode==='isometric'){this.size=THREE.MathUtils.clamp(this.size+d,12,22);this.resize(window.innerWidth,window.innerHeight);}}
@@ -39,6 +39,6 @@ export class CameraRig {
     this.target.lerp(desiredTarget,factor);
     const cam=this.active;
     cam.position.lerp(this.desired(this.target,this.mode),factor);
-    cam.lookAt(this.target.x,this.target.y+.68,this.target.z);
+    cam.lookAt(this.target.x,this.target.y+(this.mode==='isometric'?1.35:.68),this.target.z);
   }
 }

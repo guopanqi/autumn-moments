@@ -11,8 +11,11 @@ test('outdoor and home remain playable; furniture persists',async({page},testInf
 
   await page.locator('#go-home').click();
   await expect(page.locator('#place-name')).toHaveText('午后的小屋',{timeout:10_000});
-  await expect(page.locator('#decor-panel')).toBeVisible();
+  await expect(page.locator('#decor-toggle')).toBeVisible();
+  await expect(page.locator('#decor-panel')).toBeHidden();
   await page.screenshot({path:testInfo.outputPath('home.png')});
+  await page.locator('#decor-toggle').click();
+  await expect(page.locator('#decor-panel')).toBeVisible();
 
   await page.locator('[data-furniture="plant"]').click();
   await page.keyboard.press('r');
@@ -36,6 +39,7 @@ test('outdoor and home remain playable; furniture persists',async({page},testInf
   await page.reload();
   await expect(page.locator('#place-name')).toHaveText('午后的小屋');
   await expect.poll(async()=>page.evaluate(()=>JSON.parse(localStorage.getItem('autumn-moments:v2')??'{}').furniture?.length)).toBe(1);
+  await page.locator('#decor-toggle').click();
   await page.locator('#decor-undo').click();
   await expect.poll(async()=>page.evaluate(()=>JSON.parse(localStorage.getItem('autumn-moments:v2')??'{}').furniture?.length)).toBe(0);
   await page.locator('#go-park').click();

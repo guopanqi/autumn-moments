@@ -77,8 +77,8 @@ export function createHome(initial:PlacedFurniture[]=[],save:(items:PlacedFurnit
   root.add(pot(4.7,-4.25,1.15));root.add(pot(-5.05,4.20,.8));
   const lamp=new THREE.Group();lamp.position.set(4.55,0,1.9);
   lamp.add(cylinder(.3,.33,.09,'#ab8e73',0,.1,0),cylinder(.045,.06,2.0,'#b7a88e',0,1.05,0),cone(.5,.72,'#f7d8a9',0,2.13,0,14));root.add(lamp);
-  const exit=sign('去公园',1.7);exit.position.set(3.85,1.55,4.86);exit.rotation.y=Math.PI;
-  root.add(exit);root.add(box(.09,2.25,.1,'#a78567',3.85,1.12,4.88));
+  const exit=sign('去公园',1.7);exit.position.set(5.00,1.48,4.23);exit.rotation.y=-Math.PI/2;
+  root.add(exit);root.add(box(.09,2.1,.1,'#a78567',5.00,1.05,4.23));
   interactions.push({id:'home-exit',label:'出门去公园',root:exit,approach:new THREE.Vector3(3.86,0,3.92),use:()=>({message:'推开门，空气里有新鲜的草木味。',travel:'park'})});
   // Warm particles and miniature flourishes.
   const rng=rand(318);const glows:THREE.Mesh[]=[];
