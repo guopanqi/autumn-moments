@@ -1,0 +1,33 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
+:root{font-family:'Noto Sans SC',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#51554c;background:#eaf3e7;font-synthesis:none}
+*{box-sizing:border-box}html,body,#app{margin:0;width:100%;height:100%;overflow:hidden}
+#app{position:relative;isolation:isolate;background:#eaf3e7}
+#viewport,#viewport canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.vignette{pointer-events:none;position:absolute;inset:0;background:linear-gradient(180deg,rgba(240,235,202,.19),transparent 22%,transparent 67%,rgba(91,111,89,.15));z-index:1}
+.topbar{position:absolute;z-index:3;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:clamp(16px,3vw,35px);pointer-events:none;gap:12px}
+.brand{display:flex;gap:12px;align-items:center;min-width:0}
+.brand-icon{display:grid;place-items:center;color:#e8c48d;background:rgba(255,254,238,.88);width:47px;height:47px;border-radius:17px;font-size:31px;box-shadow:0 8px 28px #9d9e8a25}
+.brand strong{font-weight:700;font-size:18px;color:#536454;letter-spacing:.07em;display:block;text-shadow:0 1px #fff9}
+.brand small{display:block;font-family:Georgia,serif;color:#748479;letter-spacing:.13em;font-size:9px;margin-top:4px}
+.statbar{display:flex;gap:6px;align-items:center}
+.stat{background:rgba(255,253,239,.81);border:1px solid #ffffff90;backdrop-filter:blur(12px);border-radius:13px;padding:11px 15px;font-size:13px;color:#687967;white-space:nowrap;box-shadow:0 6px 24px #84977e13}
+.stat span{font-weight:600;color:#5b6a5c;margin-left:5px}
+.placard{position:absolute;z-index:2;top:116px;left:clamp(19px,3vw,40px);max-width:320px;pointer-events:none}
+.eyebrow{font-size:10px;letter-spacing:.27em;color:#8e927d;font-weight:600}
+.placard h1{font-family:Georgia,'Noto Sans SC',serif;font-size:clamp(24px,2.7vw,35px);font-weight:500;letter-spacing:.03em;color:#526e5e;margin:10px 0 9px;text-shadow:0 1px 0 #fff8}
+.placard p{font-size:12px;line-height:1.8;color:#7e8979;margin:0;text-shadow:0 1px 1px #ffffff95}
+.bottom-bar{z-index:3;position:absolute;bottom:clamp(18px,3vw,32px);left:clamp(16px,3vw,35px);right:clamp(16px,3vw,35px);display:flex;justify-content:space-between;align-items:end;gap:15px;pointer-events:none}
+.instructions{background:#fffef0cb;border:1px solid #fffdf1cc;padding:14px 19px;border-radius:15px;color:#728073;font-size:11px;backdrop-filter:blur(10px);box-shadow:0 9px 24px #7c8c7b1b}
+.instructions b{color:#56695e;font-weight:700}.instructions span{padding:0 7px;color:#b4ab93}
+.location-buttons{display:flex;gap:8px;pointer-events:auto}
+.place-button{appearance:none;cursor:pointer;border:1px solid #fffff5;background:#fdf8e8ed;color:#6f7c6e;padding:14px 22px;border-radius:16px;box-shadow:0 9px 24px #7b917d2c;font-size:13px;font-family:inherit;font-weight:600;transition:transform .2s,background .2s}
+.place-button:hover{transform:translateY(-2px)}.place-button.active{background:#7fa18e;color:#fff;border-color:#7fa18e}
+.interaction-hint{position:absolute;z-index:4;left:50%;bottom:112px;transform:translate(-50%,8px);padding:9px 18px;background:#fff9e8ee;border:1px solid #fffef9;border-radius:30px;color:#668472;white-space:nowrap;box-shadow:0 8px 25px #71877630;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;font-size:13px}
+.interaction-hint.visible{opacity:1;transform:translate(-50%,0)}
+.toast{position:absolute;z-index:5;top:25%;left:50%;transform:translate(-50%,-15px);max-width:min(90vw,530px);padding:15px 24px;background:#fff8e6ed;border:1px solid white;border-radius:17px;box-shadow:0 15px 50px #6d886e36;color:#617765;text-align:center;line-height:1.6;opacity:0;transition:opacity .35s,transform .35s;pointer-events:none;font-size:14px}
+.toast.visible{opacity:1;transform:translate(-50%,0)}
+.loading{position:absolute;z-index:10;inset:0;display:grid;align-content:center;justify-items:center;background:#ecf3e7;transition:opacity .8s,visibility .8s}
+.loading.hidden{opacity:0;visibility:hidden}.loading-mark{font-size:55px;color:#d2ac79;animation:spin 8s linear infinite}.loading p{font-size:13px;color:#87937a;letter-spacing:.16em}@keyframes spin{to{transform:rotate(360deg)}}
+.mobile-controls{display:none}
+@media(max-width:780px){.topbar{padding:15px}.brand strong{font-size:16px}.brand small{font-size:8px}.statbar{gap:4px}.stat{font-size:11px;padding:8px 9px}.brand-icon{width:38px;height:38px;font-size:24px}.placard{top:89px;left:17px;max-width:230px}.placard h1{font-size:25px}.placard p{font-size:11px}.bottom-bar{bottom:17px;left:12px;right:12px}.instructions{display:none}.place-button{padding:11px 14px;font-size:11px}.location-buttons{margin-left:auto}.interaction-hint{bottom:77px}.mobile-controls{position:absolute;bottom:18px;left:16px;z-index:4;display:grid;grid-template-columns:repeat(3,44px);grid-template-rows:repeat(2,44px);gap:4px}.mobile-controls button{border:1px solid white;color:#607766;background:#fffbedb8;backdrop-filter:blur(9px);border-radius:12px;font-size:20px;touch-action:none}.mobile-controls button:first-child{grid-column:2}.mobile-controls button:nth-child(2){grid-column:1;grid-row:2}.mobile-controls button:nth-child(3){grid-column:2;grid-row:2}.mobile-controls button:nth-child(4){grid-column:3;grid-row:2}}
+@media(max-width:420px){.brand small{display:none}.stat{padding:8px 7px}.stat span{margin-left:1px}.placard h1{font-size:22px}}

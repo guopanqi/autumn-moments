@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f6e9d6" />
+  <meta name="description" content="Autumn Moments — a small, gentle world of places and moments." />
+  <title>秋日片刻 · Autumn Moments</title>
+</head>
+<body>
+  <main id="app">
+    <div id="viewport" aria-label="可交互的三维生活场景"></div>
+    <div class="vignette" aria-hidden="true"></div>
+    <header class="topbar">
+      <div class="brand"><span class="brand-icon">✺</span><div><strong>秋日片刻</strong><small>AUTUMN MOMENTS · PROTOTYPE 0.1</small></div></div>
+      <div class="statbar"><div class="stat">☀ <span id="time">09:20</span></div><div class="stat">♡ <span id="mood">70</span></div><div class="stat">◌ <span id="coins">20</span></div></div>
+    </header>
+    <aside class="placard" aria-live="polite"><span class="eyebrow">你所在的地方</span><h1 id="place-name">街角的小公园</h1><p id="place-note">微风、树影，还有一些值得停留的瞬间。</p></aside>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div id="hint" class="interaction-hint" aria-live="polite"></div>
+    <div class="bottom-bar"><div class="instructions"><b>WASD / 方向键</b> 行走 <span>·</span> <b>点击地面</b> 前往 <span>·</span> <b>点击物体</b> 互动 <span>·</span> <b>滚轮</b> 室内缩放</div><div class="location-buttons"><button id="go-park" class="place-button active" type="button">☘ 公园</button><button id="go-home" class="place-button" type="button">⌂ 小屋</button></div></div>
+    <div class="mobile-controls" aria-label="移动控制"><button data-move="up" aria-label="前进">↑</button><button data-move="left" aria-label="向左">←</button><button data-move="down" aria-label="后退">↓</button><button data-move="right" aria-label="向右">→</button></div>
+    <div class="loading" id="loading"><span class="loading-mark">✺</span><p>一段缓慢的日常，即将开始。</p></div>
+  </main>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
