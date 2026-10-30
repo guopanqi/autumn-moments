@@ -277,14 +277,6 @@ test('park puppy has autonomous bounded movement and recognizes a returning play
   expect(ambient.maxDistance).toBeGreaterThan(.3);
   expect(ambient.homeDistance).toBeLessThan(3.3);
   expect(Math.abs(ambient.approach.x-(ambient.pos.x-.7))).toBeLessThan(.01);
-  const recognized=await page.evaluate(()=>{
-    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
-    const park=w.places.get('park'),dog=park.root.getObjectByName('Park puppy');
-    // Simulate existing bond via the same authoring entry point, without invoking click handlers.
-    const result={};
-    return {before:dog.position.clone(),origin:park.spawn.clone()};
-  });
-  expect(recognized.before).toBeTruthy();
   await page.evaluate(()=>{
     const saved=JSON.parse(localStorage.getItem('autumn-moments:v3')!);
     saved.dogBond=4;localStorage.setItem('autumn-moments:v3',JSON.stringify(saved));
@@ -294,6 +286,9 @@ test('park puppy has autonomous bounded movement and recognizes a returning play
   const greeting=await page.evaluate(()=>{
     const w=(window as Window&{__autumnDev?:any}).__autumnDev;
     const park=w.places.get('park'),dog=park.root.getObjectByName('Park puppy');
+    // On page reload an already-friendly dog may have greeted the player before
+    // this test begins. Reset its start pose to exercise the approach itself.
+    dog.position.set(2.1,0,2.2);
     const person=w.actor.position.clone().set(.1,0,4.1);
     const before=dog.position.distanceTo(person);
     for(let i=0;i<95;i++)park.tick(4+i/20,1/20,person);
