@@ -60,6 +60,7 @@ export class Character {
   }
   get position(){return this.group.position;}
   get isMoving(){return this.moving;}
+  get isRunning(){return this.moving&&this.pathRunning;}
   get isActing(){return !!this.action;}
   teleport(p:THREE.Vector3){this.cancel();this.group.position.copy(p);this.group.rotation.y=0;}
   cancel(){this.path=[];this.arrival=null;this.moving=false;this.pathRunning=false;this.cancelAction();}

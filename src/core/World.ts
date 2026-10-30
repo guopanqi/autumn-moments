@@ -348,7 +348,7 @@ export class World {
     }
     this.actor.update(dt,this.elapsed,moved,running);
     this.active.tick(this.elapsed,dt,this.actor.position);
-    this.camera.update(this.actor.position,dt,running);
+    this.camera.update(this.actor.position,dt,running||this.actor.isRunning);
     }
     // Shadow detail follows the actor over a larger neighborhood without a giant shadow map.
     const px=Math.round(this.actor.position.x*2)/2,pz=Math.round(this.actor.position.z*2)/2;

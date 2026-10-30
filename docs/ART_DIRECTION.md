@@ -66,3 +66,6 @@ The original park is still the recognizable center; the new curving walks lead t
 
 ## Visual correction from actual Chromium screenshots
 The first expanded park screenshots had washed-out materials and a floating foreground sign that obscured the path. We lowered exposure/ambient intensity, retained a warmer directional key, removed the obstructing sign, lowered the outdoor follow camera and added an independent sky gradient with blue zenith and warm horizon. Values are centralized in art/style.ts. These are prototype corrections, not a recreation of Summer Afternoon's non-open-source shaders; human visual acceptance remains open.
+
+### Screenshot follow-up
+Checked 1280×800 Chromium scene: removed an oversized foreground guidance sign; lowered the far ridge so the blue sky is visible at the shallower outdoor viewing angle; slightly deepened tree canopy colors. Ground, path and home assets continue to use project-owned procedural meshes. Real player preference and actual mobile FPS are not inferred from screenshots.

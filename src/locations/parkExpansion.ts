@@ -151,13 +151,12 @@ export function extendPark(root:THREE.Group,obstacles:Obstacle[],interactions:In
     approach:new THREE.Vector3(22.1,0,17.7),
     use:()=>({message:'花坛里有微微的香气，风从远处吹过来。',mood:2,gesture:'wave'})});
   decor.add(smallBench(12,27,.5));obstacles.push({x:12,z:27,r:.95});
-  const direction=sign('沿着小路走走',2.25);direction.position.set(5.2,1.65,10.8);decor.add(direction);
   instancedMeadow(decor);
   // A distant ridge adds layered depth beyond the playable bounds; do not use opaque fog to hide a hard edge.
   for(let i=0;i<12;i++){
     const x=-46+i*8.3;
-    const hill=ball(7.8,i%3===0?'#8cac9c':i%2===0?'#a0bca9':'#aabf9c',x,1.2+(i%3)*.7,-46,10,7);
-    hill.scale.set(1.3,.55,.8);hill.castShadow=false;decor.add(hill);
+    const hill=ball(7.8,i%3===0?'#8cac9c':i%2===0?'#a0bca9':'#aabf9c',x,.55+(i%3)*.38,-53,10,7);
+    hill.scale.set(1.3,.30,.85);hill.castShadow=false;decor.add(hill);
   }
   const haze=new THREE.Group();decor.add(haze);
   for(let i=0;i<5;i++){

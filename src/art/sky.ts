@@ -20,7 +20,7 @@ export function makeSky(){
       uniform vec3 zenith;
       uniform vec3 horizon;
       void main(){
-        float elevation=smoothstep(-0.12,0.78,vSphereDirection.y);
+        float elevation=smoothstep(-0.17,0.28,vSphereDirection.y);
         vec3 skyColor=mix(horizon,zenith,elevation);
         gl_FragColor=vec4(skyColor,1.0);
         #include <tonemapping_fragment>
