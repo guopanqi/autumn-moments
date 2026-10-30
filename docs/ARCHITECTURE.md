@@ -133,3 +133,7 @@ The existing `autumn-moments:v3` save adds optional `dogBond` in range 0–5, in
 
 ### Moving target input reliability
 For tiny animated actors the park dog includes an invisible raycast proxy; ordinary visuals and player collision are unchanged. When a camera moves between a hover and pointerdown at virtually the same pixel, World may accept that recent hovered interaction (850ms, 18px) if the new ray hits no interaction. Direct mobile taps still use the current ray. This is a small stabilization rule, not general sticky-selection UI.
+
+
+## V0.6b — Target cancellation and animal fetch
+The previous actor movement path could be cancelled before interaction arrival, leaving `onTargeted` temporary holds in place. `Character.follow` now accepts an optional approach-cancel callback; `World.moveTo` passes `onActionEnd` on early abort and for unwalkable targets, while the normal action lifecycle still owns cleanup after arrival. Dog fetch is strictly local to ParkDog's tick and the existing park Location; no event bus, persistent fetch counter or new save schema.

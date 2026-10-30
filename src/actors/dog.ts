@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import {ball,box,cone,rand} from '../core/geo';
 
-type Activity='idle'|'wander'|'sniff'|'sit'|'watch'|'greet';
+type Activity='idle'|'wander'|'sniff'|'sit'|'watch'|'greet'|'fetch'|'return';
+type FetchState={phase:'flight'|'chase'|'return';from:THREE.Vector3;target:THREE.Vector3;delivery:THREE.Vector3;flight:number;onComplete:()=>void};
 const clamp=(n:number,a:number,b:number)=>Math.max(a,Math.min(b,n));
 const turn=(a:number,b:number)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
 
@@ -29,6 +30,10 @@ export class ParkDog {
   private lastCelebration=-100;
   private heldUntil=-1;
   private bondLevel:number;
+  private fetch:FetchState|null=null;
+  private fetched=0;
+  private readonly flyingBall=ball(.18,'#e6a174',0,0,0,12,9);
+  private readonly mouthBall=ball(.18,'#e6a174',0,-.13,.47,12,9);
   constructor(x:number,z:number,bond=0){
     this.bondLevel=clamp(Math.floor(bond),0,5);
     this.root.name='Park puppy';
@@ -54,6 +59,8 @@ export class ParkDog {
       }
     }
     this.head.add(ball(.08,'#4d4845',0,-.08,.33));
+    this.head.add(this.mouthBall);this.mouthBall.visible=false;
+    this.flyingBall.name='Puppy flying ball';this.flyingBall.castShadow=false;
     this.tail.position.set(0,.60,-.30);this.body.add(this.tail);
     const shape=cone(.105,.47,'#e0b081',0,.23,0,8);
     shape.rotation.x=-.6;this.tail.add(shape);
@@ -67,8 +74,34 @@ export class ParkDog {
   }
   get bond(){return this.bondLevel;}
   get behavior(){return this.activity;}
+  get isFetching(){return !!this.fetch;}
+  get fetchPhase(){return this.fetch?.phase??null;}
+  get completedFetches(){return this.fetched;}
+  /** Starts an observable chase and return. No rewards are paid when the ball is thrown. */
+  startFetch(from:THREE.Vector3,target:THREE.Vector3,delivery:THREE.Vector3,onComplete:()=>void){
+    if(this.fetch)return false;
+    this.heldUntil=-1;
+    this.fetch={phase:'flight',from:from.clone(),target:target.clone(),delivery:delivery.clone(),flight:0,onComplete};
+    this.activity='fetch';
+    this.mouthBall.visible=false;
+    this.flyingBall.position.copy(from).add(new THREE.Vector3(0,.35,0));
+    this.root.parent?.add(this.flyingBall);
+    return true;
+  }
+  private finishFetch(completed:boolean){
+    const previous=this.fetch;if(!previous)return;
+    this.fetch=null;this.root.parent?.remove(this.flyingBall);
+    this.mouthBall.visible=false;
+    this.enter(completed?'sit':'idle',completed?2.2:1.2);
+    if(completed){this.fetched++;this.celebrate();}
+    previous.onComplete();
+  }
   /** The click freezes a moving target before World calculates the approach route. */
-  holdForInteraction(){this.heldUntil=this.time+15;this.activity='watch';}
+  holdForInteraction(){
+    // A new pet request interrupts a fetch and returns the toy to its rack.
+    this.finishFetch(false);
+    this.heldUntil=this.time+15;this.activity='watch';
+  }
   release(){this.heldUntil=-1;this.activity='idle';this.activityLeft=1.7;}
   pet(){
     this.bondLevel=Math.min(5,this.bondLevel+1);
@@ -110,7 +143,26 @@ export class ParkDog {
     const distance=Math.hypot(dx,dz);
     const held=this.heldUntil>elapsed;
     let walking=false;
-    if(held){
+    if(this.fetch){
+      const f=this.fetch;this.activity=f.phase==='return'?'return':'fetch';
+      if(f.phase==='flight'){
+        f.flight+=dt;
+        const t=Math.min(1,f.flight/.76);
+        this.flyingBall.position.lerpVectors(f.from,f.target,t);
+        this.flyingBall.position.y=.35+Math.sin(t*Math.PI)*1.05;
+        if(t>=1){this.root.parent?.remove(this.flyingBall);f.phase='chase';}
+      }else if(f.phase==='chase'){
+        walking=this.moveToward(f.target,dt,1.8);
+        if(this.root.position.distanceTo(f.target)<.22){
+          f.phase='return';this.mouthBall.visible=true;
+        }
+      }else{
+        walking=this.moveToward(f.delivery,dt,1.65);
+        if(this.root.position.distanceTo(f.delivery)<.36){
+          this.finishFetch(true);walking=false;
+        }
+      }
+    }else if(held){
       this.activity='watch';
     }else if(this.bondLevel>=2&&distance>1.75&&distance<5.6&&
       Math.hypot(player.x-this.home.x,player.z-this.home.z)<5.2){

@@ -343,3 +343,67 @@ test('puppy click gives affection only at gesture cue and survives reload',async
   expect(await bond()).toBe(1);
   expect(errors).toEqual([]);
 });
+
+
+test('fetch the ball only after the throw cue; dog returns it and retains normal play',async({page},testInfo)=>{
+  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('./?e2e=1');await expect(page.locator('#loading')).toBeHidden({timeout:15000});
+  const project=async()=>page.evaluate(()=>{
+    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    const rack=w.places.get('park').root.getObjectByName('Puppy ball rack');
+    const point=rack.localToWorld(w.actor.position.clone().set(0,1.42,0));
+    w.camera.active.updateMatrixWorld();point.project(w.camera.active);
+    const rect=document.querySelector<HTMLCanvasElement>('#viewport canvas')!.getBoundingClientRect();
+    return {x:rect.left+(point.x+1)*rect.width/2,y:rect.top+(1-point.y)*rect.height/2};
+  });
+  const state=()=>page.evaluate(()=>{
+    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    const dog=w.places.get('park').root.getObjectByName('Park puppy');
+    const rack=w.places.get('park').root.getObjectByName('Puppy ball rack');
+    return {fetching:dog.isFetching,phase:dog.fetchPhase,completed:dog.completedFetches,
+      visible:rack.children.find((c:any)=>c.geometry?.type==='SphereGeometry')?.visible,
+      money:JSON.parse(localStorage.getItem('autumn-moments:v3')??'{}').coins};
+  });
+  const original=await state();expect(original.fetching).toBe(false);expect(original.visible).toBe(true);
+  let p=await project();await page.mouse.move(p.x,p.y);
+  await expect(page.locator('#hint')).toContainText('抛给小狗');
+  await page.mouse.click(p.x,p.y);
+  // Interrupt approach: no ball may enter the fetch state before the animation cue.
+  await page.keyboard.down('KeyA');await page.waitForTimeout(130);await page.keyboard.up('KeyA');
+  expect((await state()).fetching).toBe(false);
+  p=await project();await page.mouse.move(p.x,p.y);await page.mouse.click(p.x,p.y);
+  await expect.poll(async()=>(await state()).fetching,{timeout:20000}).toBe(true);
+  expect((await state()).visible).toBe(false);
+  const finished=await page.evaluate(()=>{
+    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    const park=w.places.get('park'),dog=park.root.getObjectByName('Park puppy');
+    const player=w.actor.position.clone();
+    for(let i=0;i<320&&dog.isFetching;i++)park.tick(w.elapsed+(i+1)*.05,.05,player);
+    const rack=park.root.getObjectByName('Puppy ball rack');
+    return {fetching:dog.isFetching,completed:dog.completedFetches,
+      toyVisible:rack.children.find((c:any)=>c.geometry?.type==='SphereGeometry')?.visible,
+      phase:dog.fetchPhase};
+  });
+  expect(finished.fetching).toBe(false);
+  expect(finished.completed).toBe(1);
+  expect(finished.toyVisible).toBe(true);
+  await page.screenshot({path:testInfo.outputPath('puppy-fetch-returned.png')});
+  expect((await state()).money).toBe(original.money);
+  expect(errors).toEqual([]);
+});
+
+test('cancelling a targeted moving-dog approach immediately releases its hold',async({page})=>{
+  await page.goto('./?e2e=1');await expect(page.locator('#loading')).toBeHidden({timeout:15000});
+  const result=await page.evaluate(()=>{
+    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    const dog=w.places.get('park').root.getObjectByName('Park puppy');
+    const interaction=w.places.get('park').interactions.find((i:any)=>i.id==='park-dog');
+    interaction.onTargeted();
+    const during=dog.heldUntil;
+    w.moveTo(interaction.approach.clone(),undefined,'小狗',false,()=>interaction.onActionEnd?.());
+    w.actor.cancel();
+    return {during,after:dog.heldUntil,time:w.elapsed};
+  });
+  expect(result.during).toBeGreaterThan(result.time);
+  expect(result.after).toBe(-1);
+});

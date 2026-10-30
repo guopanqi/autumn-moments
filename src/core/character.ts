@@ -21,6 +21,7 @@ export class Character {
   private handheldCup=new THREE.Group();
   private path:THREE.Vector3[]=[];
   private arrival:(()=>void)|null=null;
+  private arrivalCancel:(()=>void)|null=null;
   private action:Action|null=null;
   private phase=0;
   private walkWeight=0;
@@ -63,14 +64,20 @@ export class Character {
   get isRunning(){return this.moving&&this.pathRunning;}
   get isActing(){return !!this.action;}
   teleport(p:THREE.Vector3){this.cancel();this.group.position.copy(p);this.group.rotation.y=0;}
-  cancel(){this.path=[];this.arrival=null;this.moving=false;this.pathRunning=false;this.cancelAction();}
+  cancel(){
+    const onCancel=this.arrivalCancel;
+    this.path=[];this.arrival=null;this.arrivalCancel=null;this.moving=false;this.pathRunning=false;
+    onCancel?.();
+    this.cancelAction();
+  }
   private cancelAction(){
     const previous=this.action;this.action=null;this.handheldCup.visible=false;
     previous?.onCancel?.();
   }
-  follow(path:THREE.Vector3[],done?:()=>void,run=false){
-    this.cancel();this.path=path.slice();this.pathRunning=run;this.arrival=done??null;this.moving=path.length>0;
-    if(path.length===0){this.arrival=null;done?.();}
+  follow(path:THREE.Vector3[],done?:()=>void,run=false,onCancel?:()=>void){
+    this.cancel();this.path=path.slice();this.pathRunning=run;
+    this.arrival=done??null;this.arrivalCancel=onCancel??null;this.moving=path.length>0;
+    if(path.length===0){this.arrival=null;this.arrivalCancel=null;done?.();}
   }
   faceTowards(point:THREE.Vector3){
     const dx=point.x-this.position.x,dz=point.z-this.position.z;
@@ -87,7 +94,7 @@ export class Character {
       const length=Math.hypot(dx,dz),step=(this.pathRunning?art.animation.runSpeed:art.animation.walkSpeed)*dt;
       if(length<=Math.max(step,.055)){
         this.position.set(dest.x,0,dest.z);this.path.shift();
-        if(!this.path.length){this.moving=false;const cb=this.arrival;this.arrival=null;cb?.();}
+        if(!this.path.length){this.moving=false;const cb=this.arrival;this.arrival=null;this.arrivalCancel=null;cb?.();}
       }else{
         this.position.x+=dx/length*step;this.position.z+=dz/length*step;
         const facing=Math.atan2(dx,dz);

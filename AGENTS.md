@@ -57,3 +57,10 @@ This project is Autumn Moments, a browser-first Three.js life-world. Read `docs/
 - A moving dog's approach anchor is refreshed each tick; `onTargeted` must freeze the target before computing a path. A canceled interaction cannot grant affection before its cue.
 - `dogBond` is an optional backward-compatible v3 field, normalized to 0–5; never break coins, mood or furniture saves.
 - The existing pet gesture and callback should remain the only affection award path; visual/mobile acceptance is still manual.
+
+
+## V0.6b approach lifecycle and fetch invariants
+- Targeted interactions can reserve moving actors before arrival. Cancelling movement MUST release that reservation; do not wait for timed expiry.
+- The fetch ball must be visible either at its rack, in flight, or in the dog's mouth, and be reset after completion/cancel. The action cue initiates the toss; early cancellation must not initiate fetch.
+- No currency, inventory or bond reward from fetching. This slice validates a visible sequence and human-directed animal behavior, not a new task engine.
+- Preserve V0.5 money/furniture and V0.6a bond/save schema; re-run Chromium test suite and Pages deployment.

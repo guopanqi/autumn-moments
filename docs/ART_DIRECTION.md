@@ -73,3 +73,7 @@ Checked 1280×800 Chromium scene: removed an oversized foreground guidance sign;
 
 ## V0.6a animation study: readable animal intent
 The first pet now communicates intentions through gait, lowered head for sniffing, seated body, attentive head and tail, and a short greeting approach once familiar. The leg motion is procedural and temporary, not an authored skeletal animation. Keep recognizable short pauses between behaviors; do not replace all waiting with constant idle wagging. Visual/mobile feel still requires human acceptance.
+
+
+## Puppy fetch gesture study (V0.6b)
+The single warm-coral toy is readable in three phases: on a low rack, briefly in a parabolic throw, then by the dog's muzzle during its return. Pause at the moment of collection before the return; avoid treating this first procedural pass as a finished skeletal throw/fetch animation. Human visual and touch review are still open.

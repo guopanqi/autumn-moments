@@ -278,20 +278,20 @@ export class World {
       return;
     }
     this.lastPointerHover=null;
-    if(hit){hit.onTargeted?.();this.moveTo(hit.approach.clone(),()=>this.performInteraction(hit),hit.label);return;}
+    if(hit){hit.onTargeted?.();this.moveTo(hit.approach.clone(),()=>this.performInteraction(hit),hit.label,false,()=>hit.onActionEnd?.());return;}
     const floorHits=this.raycaster.intersectObject(this.active.floor,false);
     if(floorHits.length)this.moveTo(floorHits[0].point,undefined,'那个位置',e.detail>=2);
   }
-  private moveTo(point:THREE.Vector3,done?:()=>void,targetLabel='这里',run=false){
+  private moveTo(point:THREE.Vector3,done?:()=>void,targetLabel='这里',run=false,onCancel?:()=>void){
     const b=this.active.bounds;
     const goal=new THREE.Vector3(clamp(point.x,b.minX,b.maxX),0,clamp(point.z,b.minZ,b.maxZ));
     const path=findPath(this.actor.position,goal,b,this.active.obstacles);
     if(path.length===0){
       if(this.actor.position.distanceTo(goal)<.6)done?.();
-      else this.notify('暂时走不到'+targetLabel+'，试试从另一侧靠近。');
+      else {onCancel?.();this.notify('暂时走不到'+targetLabel+'，试试从另一侧靠近。');}
       return;
     }
-    this.actor.follow(path,done,run);
+    this.actor.follow(path,done,run,onCancel);
   }
   private performInteraction(hit:Interaction){
     if(!this.active.interactions.includes(hit))return;

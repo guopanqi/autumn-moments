@@ -119,6 +119,24 @@ export function createPark(initialDogBond=0,saveDogBond:(bond:number)=>void=()=>
     onActionEnd:()=>dog.release()
   };
   interactions.push(dogInteraction);
+  // One toy, one local fetch episode. The dog chases it autonomously and brings
+  // it back; this deliberately does not create another currency or task loop.
+  const toyRack=new THREE.Group();toyRack.name='Puppy ball rack';toyRack.position.set(4.1,0,4.7);
+  toyRack.add(box(.72,.3,.66,'#ba966f',0,.18,0));
+  const toyBall=ball(.2,'#e6a174',0,.55,0,12,9);toyRack.add(toyBall);
+  const toySign=sign('一起玩球',1.65);toySign.position.set(0,1.42,0);toyRack.add(toySign);
+  root.add(toyRack);obstacles.push({x:4.1,z:4.7,r:.42});
+  interactions.push({
+    id:'park-fetch',label:'把球抛给小狗',root:toyRack,
+    approach:new THREE.Vector3(3.23,0,4.62),
+    use:()=>({message:'球飞向草地，小狗兴奋地追过去。',gesture:'wave'}),
+    onMoment:()=>{
+      if(dog.startFetch(new THREE.Vector3(4.1,0,4.7),new THREE.Vector3(4.2,0,1.5),
+        new THREE.Vector3(3.06,0,4.10),()=>{toyBall.visible=true;})){
+        toyBall.visible=false;
+      }
+    }
+  });
   const rest=bench(-1.5,-6.4,.26);root.add(rest);
   interactions.push({id:'park-bench',label:'坐一会儿',root:rest,approach:new THREE.Vector3(-1.4,0,-5.48),use:()=>({message:'风吹过树叶。什么也不做，也很好。',mood:3,gesture:'sit'})});
   const cloudMat=new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.32,depthWrite:false});

@@ -69,3 +69,7 @@ Keep one stable furniture ID through reposition/rotation. Editing uses a translu
 
 ## ADR — V0.6a single bounded dog, not an NPC framework
 Before adding a farm or a generic AI framework, animate one dog that makes understandable choices without player clicks. The fixed original park animal now has deterministic local motion, social greeting thresholds and a 0–5 bond, stored as a backward-compatible optional field in v3. Moving clickable actors need a frozen target after click, so extend the existing Interaction by the optional `onTargeted` callback; the existing onActionEnd releases its hold. No game effects are granted until the visible pet cue. This is not navigation-obstacle simulation or a completed animal relationship system.
+
+
+## ADR — V0.6b one spatial fetch interaction, no currency incentive
+Instead of introducing a farm or a general-purpose fetch-task framework, reuse the existing park puppy and Interaction cue lifecycle. The dog's local flight/chase/return phases own their visual ball state and restore it on completion or interruption. To fix a pre-existing lifecycle bug, Character receives a cancellation callback for *approach movement* (not only actions), so onTargeted holds release if movement is interrupted before arrival. The return has no monetary or relationship reward: the purpose is evaluating whether a small animal can create a moment worth observing.
