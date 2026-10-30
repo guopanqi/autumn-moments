@@ -5,6 +5,8 @@ test('outdoor and home remain playable; furniture persists',async({page},testInf
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto('./?e2e=1');
   await expect(page.locator('#loading')).toHaveClass(/hidden/,{timeout:15_000});
+  // The overlay has a CSS fade: a hidden class alone is not a scene screenshot.
+  await expect(page.locator('#loading')).toBeHidden();
   await expect(page.locator('#viewport canvas')).toBeVisible();
   await expect(page.locator('#place-name')).toHaveText('街角的小公园');
   await page.screenshot({path:testInfo.outputPath('park.png')});
@@ -299,7 +301,7 @@ test('park puppy has autonomous bounded movement and recognizes a returning play
   expect(errors).toEqual([]);
 });
 
-test('puppy click gives affection only at gesture cue and survives reload',async({page})=>{
+test('puppy click gives affection only at gesture cue and survives reload',async({page},testInfo)=>{
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('./?e2e=1');
   await expect(page.locator('#loading')).toBeHidden({timeout:15_000});
@@ -335,6 +337,7 @@ test('puppy click gives affection only at gesture cue and survives reload',async
     console.log('Puppy pet timeout state:',JSON.stringify(sceneState));
     throw error;
   }
+  await page.screenshot({path:testInfo.outputPath('puppy-after-pet.png')});
   await page.reload();
   await expect(page.locator('#place-name')).toHaveText('街角的小公园',{timeout:15000});
   expect(await bond()).toBe(1);
