@@ -119,5 +119,5 @@ V0.5 的“工作”只是一项公园内可重复的短动作，尚无工作日
 - [x] Separate Shift (mobile run button) and ground double-click run; gait cadence, body lean and outdoor camera FOV respond to locomotion.
 - [x] Expand the **same outdoor Location** from ~21×16 units of navigable bounds to 70×64 units. Keep the original park/home/earn-and-shop flow in place; add three connected walks, residential edges, flower garden and a pond without creating a new gameplay location.
 - [x] Distant ridges, warm long sightlines, grouped tree silhouettes and instanced meadow details; no source or assets copied from Summer Afternoon.
-- [ ] Verify outdoors on actual desktop and phone: navigation, run cadence, camera height, path visual rhythm, and whether edges feel too empty.
+- [ ] Verify outdoors on actual desktop and phone: navigation, run cadence, camera height, path visual rhythm, real-device FPS, and whether edges feel too empty.
 - [ ] More advanced animation and level-of-detail / occlusion remain optional pending performance measurements.

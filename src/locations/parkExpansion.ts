@@ -18,18 +18,30 @@ function pathRibbon(coords:[number,number][],width:number,color:string,y=.045){
   const mesh=new THREE.Mesh(geometry,new THREE.MeshStandardMaterial({color,roughness:1,side:THREE.DoubleSide}));
   mesh.receiveShadow=true;return mesh;
 }
-function canopyTree(x:number,z:number,scale:number,variant:number){
-  const group=new THREE.Group();group.position.set(x,0,z);group.scale.setScalar(scale);
-  group.add(cylinder(.19,.26,2.25,'#937b61',0,1.14,0,8));
-  const colors=art.leaf;
+type ForestTree={x:number;z:number;scale:number;variant:number};
+function addForestInstances(root:THREE.Group,trees:ForestTree[]){
+  // Three InstancedMeshes replace ~220 individual draw calls, including shadow passes.
+  const trunk=new THREE.InstancedMesh(new THREE.CylinderGeometry(.19,.26,2.25,8),matte('#937b61'),trees.length);
+  const crowns=Array.from({length:3},()=>new THREE.InstancedMesh(new THREE.SphereGeometry(1,10,7),matte('#ffffff'),trees.length));
   const shapes:[[number,number,number,number],[number,number,number,number],[number,number,number,number]]=[
     [0,2.78,0,1.02],[-.68,2.45,.1,.82],[.64,2.59,-.28,.84]
   ];
-  shapes.forEach(([dx,dy,dz,r],i)=>{
-    const crown=ball(r,colors[(i+variant)%colors.length],dx,dy,dz,10,7);
-    crown.scale.set(1.07,.80,.96);group.add(crown);
+  const dummy=new THREE.Object3D();
+  trees.forEach((tree,i)=>{
+    const {x,z,scale,variant}=tree;
+    dummy.position.set(x,1.14*scale,z);dummy.scale.setScalar(scale);dummy.updateMatrix();
+    trunk.setMatrixAt(i,dummy.matrix);
+    shapes.forEach(([dx,dy,dz,r],j)=>{
+      dummy.position.set(x+dx*scale,dy*scale,z+dz*scale);
+      dummy.scale.set(r*scale*1.07,r*scale*.8,r*scale*.96);dummy.updateMatrix();
+      crowns[j].setMatrixAt(i,dummy.matrix);
+      crowns[j].setColorAt(i,new THREE.Color(art.leaf[(j+variant)%art.leaf.length]));
+    });
   });
-  return group;
+  trunk.castShadow=true;trunk.receiveShadow=true;trunk.instanceMatrix.needsUpdate=true;root.add(trunk);
+  crowns.forEach(mesh=>{
+    mesh.instanceMatrix.needsUpdate=true;mesh.castShadow=true;mesh.receiveShadow=false;root.add(mesh);
+  });
 }
 function house(x:number,z:number,primary:string,roof:string){
   const root=new THREE.Group();root.position.set(x,0,z);
@@ -100,6 +112,7 @@ export function extendPark(root:THREE.Group,obstacles:Obstacle[],interactions:In
   }
   // Village edges have varied tree silhouettes; near paths stay reasonably open.
   const rng=rand(7092);
+  const forest:ForestTree[]=[];
   for(let i=0;i<55;i++){
     let x=0,z=0;
     if(i<24){x=-35+rng()*70;z=-31+rng()*5;}
@@ -107,9 +120,10 @@ export function extendPark(root:THREE.Group,obstacles:Obstacle[],interactions:In
     else if(i<50){x=30+rng()*5;z=-27+rng()*56;}
     else{x=-14+rng()*38;z=25+rng()*7;}
     if(Math.hypot(x-27,z+10)<6)continue;
-    const size=.75+rng()*.55;decor.add(canopyTree(x,z,size,Math.floor(rng()*4)));
+    const size=.75+rng()*.55;forest.push({x,z,scale:size,variant:Math.floor(rng()*4)});
     obstacles.push({x,z,r:.65*size});
   }
+  addForestInstances(decor,forest);
   // Three places with distinct visual identities and readable distant silhouettes.
   const water=oval(6.6,4.5,'#7eb8bd',26,.052,-10);
   decor.add(oval(7.15,5.0,'#d8c9a1',26,.048,-10),water);
@@ -137,7 +151,6 @@ export function extendPark(root:THREE.Group,obstacles:Obstacle[],interactions:In
     approach:new THREE.Vector3(22.1,0,17.7),
     use:()=>({message:'花坛里有微微的香气，风从远处吹过来。',mood:2,gesture:'wave'})});
   decor.add(smallBench(12,27,.5));obstacles.push({x:12,z:27,r:.95});
-  decor.add(sign('草地与小路',2.4));
   const direction=sign('沿着小路走走',2.25);direction.position.set(5.2,1.65,10.8);decor.add(direction);
   instancedMeadow(decor);
   // A distant ridge adds layered depth beyond the playable bounds; do not use opaque fog to hide a hard edge.

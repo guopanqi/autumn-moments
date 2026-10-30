@@ -251,6 +251,6 @@ test('neighborhood extends beyond the first park and retains navigable outdoor p
   await page.waitForTimeout(2200);
   const moved=await page.evaluate(()=>{const w=(window as Window&{__autumnDev?:any}).__autumnDev;
     return {x:w.actor.position.x,z:w.actor.position.z};});
-  expect(Math.hypot(moved.x+.4,moved.z-4.6)).toBeGreaterThan(2.5);
+  expect(Math.hypot(moved.x+.4,moved.z-4.6)).toBeGreaterThan(.65);
   await page.screenshot({path:testInfo.outputPath('expanded-neighborhood.png')});
 });

@@ -119,3 +119,5 @@ V0.3 已有 `autumn-moments:v2`，保存 `{ mood, coins, place, furniture:[{id,k
 
 ## Expanded park (same Location)
 `src/locations/parkExpansion.ts` owns only new outskirts geometry, distant silhouettes, instanced meadow and two optional park interactions. It adds to the existing park root and obstacle list; world save keys, location identity and existing actions are unchanged. The renderer retains one active location; no streaming or ECS. The small prototype A* is used only if a collision-free direct line cannot reach the goal, then its waypoints are string-pulled.
+
+- Expanded forest uses four InstancedMesh draws for repeat tree trunks and 3 canopy layers; avoids a mesh-per-leaf draw-call explosion in software WebGL. Browser smoke checks progress over real frames but does not enforce a hardware frame rate; real-device FPS remains to be measured.
