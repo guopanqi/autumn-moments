@@ -252,11 +252,15 @@ test('neighborhood extends beyond the first park and retains navigable outdoor p
   });
   expect(result.moving).toBe(true);
   expect(result.waypoints).toBeLessThan(30);
-  await page.waitForTimeout(2200);
-  const moved=await page.evaluate(()=>{const w=(window as Window&{__autumnDev?:any}).__autumnDev;
-    return {x:w.actor.position.x,z:w.actor.position.z};});
+  // Software WebGL frame pacing is unrelated to nav correctness. Advance exactly
+  // one second of simulation and verify a real movement along the route.
+  const moved=await page.evaluate(()=>{
+    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    for(let i=0;i<60;i++)w.actor.update(1/60,w.elapsed+i/60);
+    return {x:w.actor.position.x,z:w.actor.position.z};
+  });
   await page.screenshot({path:testInfo.outputPath('expanded-neighborhood.png')});
-  expect(Math.hypot(moved.x+.4,moved.z-4.6)).toBeGreaterThan(1.0);
+  expect(Math.hypot(moved.x+.4,moved.z-4.6)).toBeGreaterThan(1.5);
 });
 
 

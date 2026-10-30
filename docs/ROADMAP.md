@@ -158,3 +158,5 @@ V0.5 的“工作”只是一项公园内可重复的短动作，尚无工作日
 - [ ] 本阶段没有新地点、背包/道具系统、全局 AI 或复杂小游戏。
 
 - [x] Visual screenshot follow-up: replaced the oversized ball sign with an unobtrusive rack and transparent touch target; added a regression asserting that a pet request restores the toy even during a fetch.
+
+- [x] Corrected the expanded-neighborhood browser regression to evaluate 60 fixed movement steps instead of elapsed wall-clock seconds; GitHub SwiftShader frame pacing is not a valid measure of navigation or production FPS. Actual device performance remains open.
