@@ -8,7 +8,7 @@ export type Effect = { message:string; mood?:number; coins?:number; gesture?:'wa
 export interface Interaction {
   id:string; label:string; root:THREE.Object3D; approach:THREE.Vector3;
   use:()=>Effect;
-  onActionStart?:()=>void; onActionEnd?:()=>void; onMoment?:()=>void;
+  onTargeted?:()=>void; onActionStart?:()=>void; onActionEnd?:()=>void; onMoment?:()=>void;
 }
 export interface Location {
   id:PlaceId; name:string; note:string; root:THREE.Group;

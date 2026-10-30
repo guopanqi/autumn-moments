@@ -10,7 +10,7 @@ import type {Interaction,Location,PlaceId,Effect} from './types';
 import {validFurniture,isFurnitureKind,FURNITURE_KINDS,FURNITURE_PRICES,FURNITURE_LABELS,normalizeOwned,ownedForExisting,
   type FurnitureOwned,type FurnitureKind,type PlacedFurniture} from '../decor/furniture';
 
-type SavedState={mood:number;coins:number;place:PlaceId;furniture:PlacedFurniture[];owned:FurnitureOwned};
+type SavedState={mood:number;coins:number;place:PlaceId;furniture:PlacedFurniture[];owned:FurnitureOwned;dogBond:number};
 const SAVE_KEY='autumn-moments:v3';
 function load():SavedState{
   try{
@@ -20,11 +20,11 @@ function load():SavedState{
       if(Number.isFinite(saved.mood)&&Number.isFinite(saved.coins)&&(saved.place==='park'||saved.place==='home')){
         const furniture=Array.isArray(saved.furniture)?saved.furniture.filter(validFurniture).slice(0,35):[];
         return {mood:clamp(saved.mood!,0,100),coins:Math.max(0,Math.floor(saved.coins!)),place:saved.place,
-          furniture,owned:normalizeOwned(saved.owned,furniture)};
+          furniture,owned:normalizeOwned(saved.owned,furniture),dogBond:Number.isFinite(saved.dogBond)?clamp(Math.floor(saved.dogBond!),0,5):0};
       }
     }
   }catch{/* Save data may be absent or incompatible. */}
-  return {mood:70,coins:20,place:'park',furniture:[],owned:ownedForExisting([])};
+  return {mood:70,coins:20,place:'park',furniture:[],owned:ownedForExisting([]),dogBond:0};
 }
 function clamp(v:number,a:number,b:number){return Math.min(b,Math.max(a,v));}
 
@@ -74,7 +74,9 @@ export class World {
     this.scene.add(this.actor.group);
     const ring=new THREE.Mesh(new THREE.RingGeometry(.57,.66,40),new THREE.MeshBasicMaterial({color:'#f2dfae',side:THREE.DoubleSide,transparent:true,opacity:.72,depthWrite:false}));
     ring.rotation.x=-Math.PI/2;ring.position.y=.065;ring.visible=false;this.scene.add(ring);this.halo=ring;
-    this.places.set('park',createPark());
+    this.places.set('park',createPark(this.saved.dogBond,bond=>{
+      this.saved.dogBond=bond;this.save();
+    }));
     this.places.set('home',createHome(this.saved.furniture,items=>{
       this.saved.furniture=items;this.save();this.renderCatalog();
     },kind=>this.available(kind)>0));
@@ -263,7 +265,7 @@ export class World {
     }
     this.setHover(hit);
     if(!activate)return;
-    if(hit){this.moveTo(hit.approach,()=>this.performInteraction(hit),hit.label);return;}
+    if(hit){hit.onTargeted?.();this.moveTo(hit.approach.clone(),()=>this.performInteraction(hit),hit.label);return;}
     const floorHits=this.raycaster.intersectObject(this.active.floor,false);
     if(floorHits.length)this.moveTo(floorHits[0].point,undefined,'那个位置',e.detail>=2);
   }

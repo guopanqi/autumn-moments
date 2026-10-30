@@ -59,7 +59,7 @@ function homeExterior(x:number,z:number){
   g.add(box(4.2,.17,.72,'#c3a17c',0,.12,1.97));
   return g;
 }
-export function createPark():Location{
+export function createPark(initialDogBond=0,saveDogBond:(bond:number)=>void=()=>{}):Location{
   const root=new THREE.Group();root.name='Park';const interactions:Interaction[]=[];
   const obstacles:Obstacle[]=[];const rng=rand(48817);
   const floor=ground(90,90,art.meadow);root.add(floor);
@@ -110,8 +110,15 @@ export function createPark():Location{
   interactions.push({id:'park-work',label:'帮忙整理花坛 · 报酬 12',root:work,
     approach:new THREE.Vector3(-2.75,0,3.55),
     use:()=>({message:'花坛整理好了，收到 12 枚工资。',coins:12,mood:-2,gesture:'pet'})});
-  const dog=new ParkDog(2.1,2.2);root.add(dog.root);
-  interactions.push({id:'park-dog',label:'摸摸小狗',root:dog.root,approach:new THREE.Vector3(1.6,0,2.6),use:()=>({message:'它开心地摇起尾巴，靠着你的手不肯离开。',mood:6,gesture:'pet'}),onMoment:()=>dog.celebrate()});
+  const dog=new ParkDog(2.1,2.2,initialDogBond);root.add(dog.root);
+  const dogInteraction:Interaction={
+    id:'park-dog',label:'摸摸小狗',root:dog.root,approach:new THREE.Vector3(1.6,0,2.6),
+    onTargeted:()=>dog.holdForInteraction(),
+    use:()=>({message:dog.bond>=2?'小狗认出你了，主动靠过来摇尾巴。':'小狗开心地摇起尾巴，靠着你的手。',mood:6,gesture:'pet'}),
+    onMoment:()=>saveDogBond(dog.pet()),
+    onActionEnd:()=>dog.release()
+  };
+  interactions.push(dogInteraction);
   const rest=bench(-1.5,-6.4,.26);root.add(rest);
   interactions.push({id:'park-bench',label:'坐一会儿',root:rest,approach:new THREE.Vector3(-1.4,0,-5.48),use:()=>({message:'风吹过树叶。什么也不做，也很好。',mood:3,gesture:'sit'})});
   const cloudMat=new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.32,depthWrite:false});
@@ -128,7 +135,10 @@ export function createPark():Location{
     bounds:{minX:-35,maxX:35,minZ:-32,maxZ:32},obstacles,
     spawn:new THREE.Vector3(-.4,0,4.6),camera:'follow',interactions,
     tick:(time,dt,player)=>{
-      dog.tick(time,dt,player);tickOutskirts(time);
+      dog.tick(time,dt,player);
+      dogInteraction.approach.set(dog.root.position.x-.70,0,dog.root.position.z+.75);
+      dogInteraction.label=dog.bond>=2?'熟悉的小狗 · 摸摸它':'摸摸小狗';
+      tickOutskirts(time);
       leafs.forEach((leaf,i)=>{leaf.position.x+=Math.sin(time*.6+i)*.0015;leaf.position.y=2+Math.sin(time*.8+i*1.7)*.35;});
     }};
 }
