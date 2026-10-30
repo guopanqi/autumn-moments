@@ -81,3 +81,6 @@ Three.js + TypeScript + Vite；代码生成场景/道具；不需要后端。开
 
 ### Exploring the enlarged neighborhood
 Outdoor park paths now continue into a small neighborhood with a village road, flower garden, distant houses and a pond. WASD walks, holding Shift runs, and double-clicking the ground runs toward a point. The home remains an isometric room with the same decoration and earnings. This is one expanded outdoor scene, **not** three new locations. Summer Afternoon is a visual study only; its source is proprietary.
+
+### V0.6a — A living puppy in the park
+The existing puppy now takes independent short walks, sniffs the ground, rests and notices nearby visitors. After repeated successful petting actions it is increasingly willing to approach the player; the 0–5 relationship persists as optional `dogBond` in the existing v3 save. Click an animated dog to approach and pet it; canceled actions do not grant relationship progress. The park, house, work and furniture economy remain intact. No new location or generic NPC engine was added. These are procedural motion prototypes, not final skeletal animations; phone performance and animation appeal still need user review.
