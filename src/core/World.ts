@@ -34,6 +34,7 @@ export class World {
   private keys=new Set<string>();
   private mobileKeys=new Set<string>();
   private toastTimer=0;
+  private transitioning=false;
   private startTime=9*60+20;
   constructor(container:HTMLElement){
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
@@ -83,6 +84,21 @@ export class World {
     document.querySelectorAll<HTMLButtonElement>('.place-button').forEach(btn=>btn.classList.toggle('active',btn.id==='go-'+id));
     this.setHover(null);this.renderHUD();
   }
+  private transitionTo(id:PlaceId){
+    if(this.transitioning||id===this.active.id)return;
+    this.transitioning=true;
+    this.actor.cancel();
+    this.setHover(null);
+    const veil=document.getElementById('scene-wipe');
+    veil?.classList.add('visible');
+    window.setTimeout(()=>{
+      this.switchPlace(id);
+      window.setTimeout(()=>{
+        veil?.classList.remove('visible');
+        this.transitioning=false;
+      },100);
+    },270);
+  }
   private bindControls(container:HTMLElement){
     window.addEventListener('keydown',(e)=>{
       if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();
@@ -94,8 +110,8 @@ export class World {
     container.addEventListener('pointerdown',(e)=>{if(e.button===0)this.pick(e,true);});
     container.addEventListener('pointerleave',()=>this.setHover(null));
     container.addEventListener('wheel',(e)=>{if(this.active.camera==='isometric'){e.preventDefault();this.camera.zoom(e.deltaY*.013);}}, {passive:false});
-    document.getElementById('go-park')?.addEventListener('click',()=>this.switchPlace('park'));
-    document.getElementById('go-home')?.addEventListener('click',()=>this.switchPlace('home'));
+    document.getElementById('go-park')?.addEventListener('click',()=>this.transitionTo('park'));
+    document.getElementById('go-home')?.addEventListener('click',()=>this.transitionTo('home'));
     document.querySelectorAll<HTMLButtonElement>('[data-move]').forEach(button=>{
       const dir=button.dataset.move!;
       const start=(e:PointerEvent)=>{e.preventDefault();button.setPointerCapture(e.pointerId);this.mobileKeys.add(dir);};
@@ -115,6 +131,7 @@ export class World {
     this.renderer.domElement.style.cursor=hit?'pointer':'crosshair';
   }
   private pick(e:PointerEvent,activate:boolean){
+    if(this.transitioning)return;
     const bounds=this.renderer.domElement.getBoundingClientRect();
     this.pointer.set((e.clientX-bounds.left)/bounds.width*2-1,-(e.clientY-bounds.top)/bounds.height*2+1);
     this.raycaster.setFromCamera(this.pointer,this.camera.active);
@@ -127,7 +144,7 @@ export class World {
     }
     this.setHover(hit);
     if(!activate)return;
-    if(hit){this.moveTo(hit.approach,()=>this.apply(hit!.use()),hit.label);return;}
+    if(hit){this.moveTo(hit.approach,()=>this.performInteraction(hit),hit.label);return;}
     const floorHits=this.raycaster.intersectObject(this.active.floor,false);
     if(floorHits.length)this.moveTo(floorHits[0].point,undefined,'那个位置');
   }
@@ -142,11 +159,24 @@ export class World {
     }
     this.actor.follow(path,done);
   }
+  private performInteraction(hit:Interaction){
+    if(!this.active.interactions.includes(hit))return;
+    const effect=hit.use();
+    if(effect.travel){this.apply(effect);return;}
+    // Walking, animation and gameplay effect have distinct lifecycles.
+    this.actor.cancel();
+    this.actor.faceTowards(hit.root.getWorldPosition(new THREE.Vector3()));
+    const gesture=effect.gesture??'wave';
+    hit.onActionStart?.();
+    this.actor.act(gesture,()=>{
+      hit.onMoment?.();
+      this.apply(effect);
+    },()=>hit.onActionEnd?.(),()=>hit.onActionEnd?.());
+  }
   private apply(effect:Effect){
-    if(effect.travel){this.switchPlace(effect.travel);return;}
+    if(effect.travel){this.transitionTo(effect.travel);return;}
     this.saved.mood=clamp(this.saved.mood+(effect.mood??0),0,100);
     this.saved.coins=Math.max(0,this.saved.coins+(effect.coins??0));
-    if(effect.gesture)this.actor.act(effect.gesture);
     this.notify(effect.message);this.save();this.renderHUD();this.chime();
   }
   private chime(){
@@ -177,20 +207,21 @@ export class World {
     if(this.keys.has('KeyD')||this.keys.has('ArrowRight')||this.mobileKeys.has('right'))x+=1;
     if(this.keys.has('KeyW')||this.keys.has('ArrowUp')||this.mobileKeys.has('up'))z-=1;
     if(this.keys.has('KeyS')||this.keys.has('ArrowDown')||this.mobileKeys.has('down'))z+=1;
-    if(x!==0||z!==0){
+    let moved=false;
+    if(!this.transitioning&&(x!==0||z!==0)){
       this.actor.cancel();
       const l=Math.hypot(x,z),dir=new THREE.Vector3(x/l,0,z/l);
       const next=this.actor.position.clone().addScaledVector(dir,art.animation.walkSpeed*dt);
       const b=this.active.bounds;
       next.x=clamp(next.x,b.minX,b.maxX);next.z=clamp(next.z,b.minZ,b.maxZ);
       const blocked=this.active.obstacles.some(o=>(next.x-o.x)**2+(next.z-o.z)**2<(o.r+.25)**2);
-      if(!blocked)this.actor.position.copy(next);
+      if(!blocked){this.actor.position.copy(next);moved=true;}
       const facing=Math.atan2(dir.x,dir.z);
       const diff=Math.atan2(Math.sin(facing-this.actor.group.rotation.y),Math.cos(facing-this.actor.group.rotation.y));
       this.actor.group.rotation.y+=diff*Math.min(1,dt*12);
     }
-    this.actor.update(dt,this.elapsed,x!==0||z!==0);
-    this.active.tick(this.elapsed,dt);
+    this.actor.update(dt,this.elapsed,moved);
+    this.active.tick(this.elapsed,dt,this.actor.position);
     this.camera.update(this.actor.position,dt);
     this.renderer.render(this.scene,this.camera.active);
     if(this.toastTimer>0){this.toastTimer-=dt;if(this.toastTimer<=0)document.getElementById('toast')?.classList.remove('visible');}

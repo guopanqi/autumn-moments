@@ -62,7 +62,7 @@ export function createHome():Location{
   handle.position.set(.17,.12,0);handle.rotation.y=Math.PI/2;mug.add(handle);
   table.add(mug);root.add(table);
   obstacles.push({x:.3,z:.4,r:.90});
-  interactions.push({id:'home-tea',label:'喝一杯热茶',root:mug,approach:new THREE.Vector3(.6,0,1.80),use:()=>({message:'热气轻轻升起，今天似乎也没那么匆忙了。',mood:8,gesture:'sip'})});
+  interactions.push({id:'home-tea',label:'喝一杯热茶',root:mug,approach:new THREE.Vector3(.6,0,1.80),use:()=>({message:'热气轻轻升起，今天似乎也没那么匆忙了。',mood:8,gesture:'sip'}),onActionStart:()=>{mug.visible=false;},onActionEnd:()=>{mug.visible=true;}});
   // Bed with layered pillows and a check-pattern blanket.
   const bed=new THREE.Group();bed.position.set(-3.60,0,-2.75);
   bed.add(box(2.72,.34,3.42,'#b88867',0,.30,0));
@@ -71,7 +71,7 @@ export function createHome():Location{
   bed.add(box(2.74,1.17,.17,'#b98a69',0,.70,-1.7));
   for(const xx of [-.65,.65])bed.add(box(.92,.18,.66,'#f4e9d7',xx,.74,-1.03));
   root.add(bed);obstacles.push({x:-3.6,z:-2.75,r:1.35});
-  interactions.push({id:'home-bed',label:'躺下休息',root:bed,approach:new THREE.Vector3(-3.5,0,-.52),use:()=>({message:'阳光透过窗帘，房间静了下来。',mood:12,gesture:'sit'})});
+  interactions.push({id:'home-bed',label:'躺下休息',root:bed,approach:new THREE.Vector3(-3.5,0,-.52),use:()=>({message:'阳光透过窗帘，房间静了下来。',mood:12,gesture:'rest'})});
   root.add(shelf(-5.2,2.5));obstacles.push({x:-5.2,z:2.5,r:.7});
   root.add(pot(4.7,-4.25,1.15));root.add(pot(-5.05,4.20,.8));
   const lamp=new THREE.Group();lamp.position.set(4.55,0,1.9);

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import {art} from '../art/style';
 import {add,ball,box,cone,cylinder,ground,matte,oval,rand,sign} from '../core/geo';
 import type {Location,Interaction,Obstacle} from '../core/types';
+import {ParkDog} from '../actors/dog';
 
 function tree(x:number,z:number,scale=1,autumn=false){
   const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(scale);
@@ -40,21 +41,6 @@ function swingSet(x:number,z:number){
     g.add(box(.88,.085,.37,'#e5b97d',cx,1.15,0));
   }
   return g;
-}
-function tinyDog(x:number,z:number){
-  const g=new THREE.Group();g.position.set(x,0,z);
-  const dog=new THREE.Group();g.add(dog);dog.add(ball(.35,'#d8a671',0,.47,0));
-  dog.add(ball(.285,'#e8c294',0,.66,.33));
-  for(const xx of [-.2,.2]){
-    const ear=cone(.14,.30,'#b77a57',xx,.85,.31,8);ear.rotation.z=xx<0?.25:-.25;dog.add(ear);
-    dog.add(ball(.046,'#4d4845',xx*.74,.68,.588,8,6));
-    dog.add(box(.12,.32,.12,'#cc9b6a',xx,.19,-.16));
-    dog.add(box(.12,.32,.12,'#cc9b6a',xx,.19,.23));
-  }
-  dog.add(ball(.08,'#4d4845',0,.56,.60));
-  const tail=new THREE.Group();tail.position.set(0,.60,-.3);
-  const shape=cone(.105,.47,'#e0b081',0,.23,0,8);shape.rotation.x=-.6;tail.add(shape);dog.add(tail);
-  return {root:g,tail,body:dog};
 }
 function homeExterior(x:number,z:number){
   const g=new THREE.Group();g.position.set(x,0,z);
@@ -112,8 +98,8 @@ export function createPark():Location{
   const gate=sign('回家 · HOME',2.5);gate.position.set(5.8,1.65,-5.6);gate.rotation.y=-.15;
   root.add(gate);root.add(cylinder(.08,.1,2.3,'#9a816d',5.8,1.12,-5.61));
   interactions.push({id:'home-door',label:'回到小屋',root:gate,approach:new THREE.Vector3(5.45,0,-4.6),use:()=>({message:'沿着熟悉的小路回家。',travel:'home'})});
-  const dog=tinyDog(2.1,2.2);root.add(dog.root);
-  interactions.push({id:'park-dog',label:'摸摸小狗',root:dog.root,approach:new THREE.Vector3(1.6,0,2.6),use:()=>({message:'它开心地摇起尾巴，靠着你的手不肯离开。',mood:6,gesture:'wave'})});
+  const dog=new ParkDog(2.1,2.2);root.add(dog.root);
+  interactions.push({id:'park-dog',label:'摸摸小狗',root:dog.root,approach:new THREE.Vector3(1.6,0,2.6),use:()=>({message:'它开心地摇起尾巴，靠着你的手不肯离开。',mood:6,gesture:'pet'}),onMoment:()=>dog.celebrate()});
   const rest=bench(-1.5,-6.4,.26);root.add(rest);
   interactions.push({id:'park-bench',label:'坐一会儿',root:rest,approach:new THREE.Vector3(-1.4,0,-5.48),use:()=>({message:'风吹过树叶。什么也不做，也很好。',mood:3,gesture:'sit'})});
   const cloudMat=new THREE.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.32,depthWrite:false});
@@ -128,9 +114,8 @@ export function createPark():Location{
   return {id:'park',name:'街角的小公园',note:'微风、树影，还有一些值得停留的瞬间。',root,floor,
     bounds:{minX:-10.5,maxX:10.5,minZ:-8.4,maxZ:7.2},obstacles,
     spawn:new THREE.Vector3(-.4,0,4.6),camera:'follow',interactions,
-    tick:(time)=>{
-      dog.tail.rotation.z=Math.sin(time*13)*.42;
-      dog.body.position.y=Math.sin(time*2.9)*.045;
+    tick:(time,dt,player)=>{
+      dog.tick(time,dt,player);
       leafs.forEach((leaf,i)=>{leaf.position.x+=Math.sin(time*.6+i)*.0015;leaf.position.y=2+Math.sin(time*.8+i*1.7)*.35;});
     }};
 }

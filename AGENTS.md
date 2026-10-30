@@ -11,3 +11,12 @@ This project is Autumn Moments, a browser-first Three.js life-world. Read `docs/
 7. Run `npm run build` and test in the browser. Distinguish passing CI from actual visual verification.
 8. Maintain documentation, assets license register, and explicit remaining gaps as features evolve.
 9. Never claim a GitHub Pages site is live without verifying its deployment URL or a successful Pages run.
+
+
+## V0.2 interaction invariants
+
+- Do not apply mood/coins when a scene object is first clicked; only apply them at the action cue.
+- Any action cancellation must release temporary presentation state (cup visibility, etc.) through the same cleanup callback as normal finish.
+- New interactive objects should implement the existing `Interaction` contract; do not introduce action-specific branches in `World`.
+- Animal ambient update must remain separate from input handling; player input can cause a temporary reaction, not the entire idle motion.
+- Until real browser screenshots are reviewed, describe V0.2 as implemented and build-checked, not visually accepted.

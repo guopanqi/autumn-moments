@@ -17,7 +17,8 @@ src/
   core/types.ts         PlaceId, Interaction, Effect, Location
   core/World.ts         主循环、输入、地点生命周期、跨地点状态
   core/CameraRig.ts     透视跟随与正交等距相机
-  core/character.ts     角色与临时表现/动作
+  core/character.ts     程序化角色 + 阶段式可取消动作表演层
+  actors/dog.ts         有独立时钟与反馈的公园动物行为
   core/navigation.ts    小型场景 A* 寻路
   locations/park.ts     公园组装、互动注册、局部行为
   locations/home.ts     小屋组装、互动注册、局部行为
@@ -40,12 +41,14 @@ Interaction { id, label, root, approach, use() -> Effect }
 玩家输入（点击/触摸）
   -> Raycast 找互动对象
   -> 导航到 approach 锚点
-  -> 抵达后执行 use()
-  -> World 应用 Effect（心情/经济/旅行/动作）
+  -> 抵达后执行 use() 获取意图/效果（不提前修改状态）
+  -> action.start → 动作 progress 触发 moment cue
+  -> World 在 cue 时应用 Effect（心情/经济）
+  -> action.finish / action.cancel 释放表现对象
   -> UI/声音/保存反馈
 ```
 
-将来引入 `ActionDefinition`：包含 preconditions、duration、animation cue、state effect、cancellation、facing target。暂不加完整行为树。所有异步动作都必须有可取消条件，防止中途切场景后触发旧回调。
+V0.2 已使用 `Character.act(kind, onMoment, onFinish, onCancel)`：`use()` 只计算要返回的 `Effect`，所有状态变更在动作 cue 后进行；`onActionStart/onActionEnd` 挂在互动对象上，负责桌面茶杯显隐等表现资源；被新移动或切换地点打断时，必须走相同的结束清理。参见 [ACTIONS.md](ACTIONS.md)。未来再将简单程序动作替换为骨骼动画，暂不创建万能行为树。
 
 ## 输入与镜头
 
@@ -59,7 +62,7 @@ V0.1 使用 0.45m 规则网格 A* + 圆形静态障碍，能够避免走过桌�
 
 ## 世界状态与存档
 
-V0.1 的浏览器存档仅包含 `{ mood, coins, place }`。键 `autumn-moments:v1`。**时间仅在会话内**，人物位置和家具摆放不保存；不宣称实现完整世界持久化。
+V0.2 仍沿用 V0.1 的浏览器存档，仅包含 `{ mood, coins, place }`。键 `autumn-moments:v1`。**时间仅在会话内**，人物位置和家具摆放不保存；不宣称实现完整世界持久化。
 
 未来的状态形式：
 
@@ -87,7 +90,7 @@ V0.1 的浏览器存档仅包含 `{ mood, coins, place }`。键 `autumn-moments:
 
 - 摄像机尚未做到角色与场景遮挡时的透明化/绕行。
 - 障碍物是圆形近似；室内家具边缘体验仍需改良。
-- 角色没有骨骼，动作只是临时程序动画。
+- 角色没有骨骼，当前动作有明确事件时机但仍是程序姿态；需要 GLB 的动画 clip 与手部 attachment 适配。
 - 地点布局代码化，尚未移到声明式场景 JSON。
 - 数据层与表现层在 V0.1 仍有耦合，扩大前需要抽出 action controller。
 - 没有真实的资产替换过程与视觉回归截图流程。
