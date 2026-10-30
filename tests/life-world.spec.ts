@@ -123,6 +123,20 @@ test('paid park action funds a lamp, which remains owned through placement, remo
     return {x:box.left+(v.x+1)*box.width/2,y:box.top+(1-v.y)*box.height/2};
   },{x,y,z});
   const work=await point(-2.75,1.63,2.55);
+  await page.mouse.move(work.x,work.y);
+  const probe=await page.evaluate(({x,y})=>{
+    const w=(window as Window & {__autumnDev?:any}).__autumnDev;
+    const rect=document.querySelector<HTMLCanvasElement>('#viewport canvas')!.getBoundingClientRect();
+    w.pointer.set((x-rect.left)/rect.width*2-1,-(y-rect.top)/rect.height*2+1);
+    w.raycaster.setFromCamera(w.pointer,w.camera.active);
+    const target=w.places.get('park').interactions.find((i:any)=>i.id==='park-work');
+    return {workHits:w.raycaster.intersectObject(target.root,true).length,
+      firstHit:w.raycaster.intersectObjects(w.places.get('park').interactions.map((i:any)=>i.root),true)[0]?.object.name,
+      hint:document.querySelector('#hint')?.textContent,
+      player:{x:w.actor.position.x,z:w.actor.position.z}};
+  },work);
+  console.log('Park work click diagnostic',JSON.stringify({work,probe}));
+  await expect(page.locator('#hint')).toContainText('整理花坛');
   await page.mouse.click(work.x,work.y);
   await expect.poll(async()=>(await save()).coins,{timeout:20000}).toBe(32);
   expect((await save()).mood).toBe(68);
