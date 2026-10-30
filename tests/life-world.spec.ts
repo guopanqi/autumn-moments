@@ -109,7 +109,7 @@ test('placed furniture can be selected, moved, rotated, removed, undone and redo
 
 
 // V0.5 complete earn > buy > place loop, using actual scene click and persisted save.
-test('paid park action funds a lamp, which remains owned through placement, removal and reload',async({page})=>{
+test('paid park action funds a lamp, which remains owned through placement, removal and reload',async({page},testInfo)=>{
   const errors:string[]=[];
   page.on('pageerror',e=>errors.push(e.message));
   await page.goto('./?e2e=1');
@@ -127,7 +127,15 @@ test('paid park action funds a lamp, which remains owned through placement, remo
   const work=await point(-2.75,1.63,2.55);
   await page.mouse.move(work.x,work.y);
   await expect(page.locator('#hint')).toContainText('整理花坛');
+  // Interrupt the trip to the job: an uncompleted action must never pay wages.
   await page.mouse.click(work.x,work.y);
+  await page.keyboard.down('KeyA');
+  await page.waitForTimeout(150);
+  await page.keyboard.up('KeyA');
+  expect((await save()).coins).toBe(20);
+  const retry=await point(-2.75,1.63,2.55);
+  await page.mouse.move(retry.x,retry.y);
+  await page.mouse.click(retry.x,retry.y);
   await expect.poll(async()=>(await save()).coins,{timeout:20000}).toBe(32);
   expect((await save()).mood).toBe(68);
   await page.locator('#go-home').click();
@@ -144,6 +152,7 @@ test('paid park action funds a lamp, which remains owned through placement, remo
   await expect.poll(async()=>(await save()).furniture.length).toBe(1);
   expect((await save()).owned.lamp).toBe(1);
   await expect(page.locator('[data-furniture="lamp"]')).toBeDisabled();
+  await page.screenshot({path:testInfo.outputPath('paid-lamp-in-home.png')});
   await page.reload();
   await expect(page.locator('#place-name')).toHaveText('午后的小屋');
   const loaded=await save();
