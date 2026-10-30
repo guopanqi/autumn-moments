@@ -126,3 +126,15 @@ V0.5 的“工作”只是一项公园内可重复的短动作，尚无工作日
 ### Browser low-FPS follow-up
 - [x] Investigated slow expanded-neighborhood Chromium screenshot playback. Reduced repeat tree draw calls through instancing and corrected render-time step loss via substepped simulation; retaining performance profiling as an explicit follow-up.
 - [ ] Profile real devices (FPS, draw calls, GPU memory, scene loading) and tune sky/landscape materials using screenshot review; low-FPS headless SwiftShader is not a substitute for hardware benchmarking.
+
+
+## V0.6a — 公园里的一只有自己生活的小狗（2026-10-30）
+
+- [x] 原有公园小狗不再固定：自行决定短距离散步、嗅闻、坐下与观察，中央草地有安全活动范围，不新增地点或导航框架。
+- [x] 接近玩家时能注视；互动 2 次以上后会主动向附近玩家靠近，达到 4 次时靠近速度更积极。
+- [x] 点击移动中的小狗会暂时固定其位置，交互锚点跟随位置更新；动作关键时刻才增加亲密度，取消前不会提前记账。
+- [x] `autumn-moments:v3` 保留现有金币/心情/家具字段，新增可选 `dogBond:0..5`，旧档默认 0；没有新存档键或重型宠物系统。
+- [ ] 用户在真实桌面/手机验收：是否能看出不同活动、靠近与抚摸是否自然，路径与镜头是否有冲突。
+- [ ] 更复杂的动物、牧场、新地点以及长期背景模拟不属于此切片。
+
+设计验证问题：不发放金币、不额外放置任务，玩家是否愿意停下来观察小狗？不能把程序状态存在视为已经验证情绪价值。

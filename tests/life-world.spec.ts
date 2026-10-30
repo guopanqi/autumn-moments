@@ -256,3 +256,80 @@ test('neighborhood extends beyond the first park and retains navigable outdoor p
   await page.screenshot({path:testInfo.outputPath('expanded-neighborhood.png')});
   expect(Math.hypot(moved.x+.4,moved.z-4.6)).toBeGreaterThan(1.0);
 });
+
+
+test('park puppy has autonomous bounded movement and recognizes a returning player',async({page})=>{
+  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('./?e2e=1');
+  await expect(page.locator('#loading')).toBeHidden({timeout:15_000});
+  const ambient=await page.evaluate(()=>{
+    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    const park=w.places.get('park'),dog=park.root.getObjectByName('Park puppy');
+    if(!dog)throw new Error('Missing puppy');
+    const initial=dog.position.clone(),far=w.actor.position.clone().set(15,0,15);
+    let maxDistance=0;
+    for(let i=0;i<440;i++){
+      park.tick(4+i/20,1/20,far);
+      maxDistance=Math.max(maxDistance,dog.position.distanceTo(initial));
+    }
+    return {maxDistance,homeDistance:dog.position.distanceTo(initial),approach:park.interactions.find((i:any)=>i.id==='park-dog').approach.clone(),pos:dog.position.clone()};
+  });
+  expect(ambient.maxDistance).toBeGreaterThan(.3);
+  expect(ambient.homeDistance).toBeLessThan(3.3);
+  expect(Math.abs(ambient.approach.x-(ambient.pos.x-.7))).toBeLessThan(.01);
+  const recognized=await page.evaluate(()=>{
+    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    const park=w.places.get('park'),dog=park.root.getObjectByName('Park puppy');
+    // Simulate existing bond via the same authoring entry point, without invoking click handlers.
+    const result={};
+    return {before:dog.position.clone(),origin:park.spawn.clone()};
+  });
+  expect(recognized.before).toBeTruthy();
+  await page.evaluate(()=>{
+    const saved=JSON.parse(localStorage.getItem('autumn-moments:v3')!);
+    saved.dogBond=4;localStorage.setItem('autumn-moments:v3',JSON.stringify(saved));
+  });
+  await page.reload();
+  await expect(page.locator('#loading')).toBeHidden({timeout:15_000});
+  const greeting=await page.evaluate(()=>{
+    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    const park=w.places.get('park'),dog=park.root.getObjectByName('Park puppy');
+    const person=w.actor.position.clone().set(.1,0,4.1);
+    const before=dog.position.distanceTo(person);
+    for(let i=0;i<95;i++)park.tick(4+i/20,1/20,person);
+    return {before,after:dog.position.distanceTo(person),label:park.interactions.find((i:any)=>i.id==='park-dog').label};
+  });
+  expect(greeting.after).toBeLessThan(greeting.before-.4);
+  expect(greeting.label).toContain('熟悉的小狗');
+  expect(errors).toEqual([]);
+});
+
+test('puppy click gives affection only at gesture cue and survives reload',async({page})=>{
+  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('./?e2e=1');
+  await expect(page.locator('#loading')).toBeHidden({timeout:15_000});
+  const bond=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('autumn-moments:v3')??'{}').dogBond??0);
+  const clickDog=async()=>{
+    const point=await page.evaluate(()=>{
+      const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+      const dog=w.places.get('park').root.getObjectByName('Park puppy');
+      dog.updateWorldMatrix(true,true);
+      const target=dog.localToWorld(w.actor.position.clone().set(0,.66,.34));
+      w.camera.active.updateMatrixWorld();target.project(w.camera.active);
+      const rect=document.querySelector<HTMLCanvasElement>('#viewport canvas')!.getBoundingClientRect();
+      return {x:rect.left+(target.x+1)*rect.width/2,y:rect.top+(1-target.y)*rect.height/2};
+    });
+    await page.mouse.move(point.x,point.y);
+    await expect(page.locator('#hint')).toContainText('摸摸小狗',{timeout:6000});
+    await page.mouse.click(point.x,point.y);
+  };
+  await clickDog();
+  await page.keyboard.down('KeyA');await page.waitForTimeout(130);await page.keyboard.up('KeyA');
+  expect(await bond()).toBe(0);
+  await clickDog();
+  await expect.poll(bond,{timeout:30000}).toBe(1);
+  await page.reload();
+  await expect(page.locator('#place-name')).toHaveText('街角的小公园',{timeout:15000});
+  expect(await bond()).toBe(1);
+  expect(errors).toEqual([]);
+});

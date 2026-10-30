@@ -50,3 +50,10 @@ This project is Autumn Moments, a browser-first Three.js life-world. Read `docs/
 - Keep the original park/home anchor, work reward and save inventory semantics stable while expanding the same outdoor location.
 - Avoid per-grass Mesh objects: instanced decorative details and clear collision boundaries. New navigation edges must be tested.
 - Watch for heading oscillation; do not regress to grid-cell-by-grid-cell yaw. Human evaluation of running and scene richness remains necessary after CI.
+
+
+## V0.6a dog interaction
+- The dog must visibly act without commands, but stay bounded in the existing central park and out of fixed interactions; avoid generic behavior-tree code.
+- A moving dog's approach anchor is refreshed each tick; `onTargeted` must freeze the target before computing a path. A canceled interaction cannot grant affection before its cue.
+- `dogBond` is an optional backward-compatible v3 field, normalized to 0–5; never break coins, mood or furniture saves.
+- The existing pet gesture and callback should remain the only affection award path; visual/mobile acceptance is still manual.

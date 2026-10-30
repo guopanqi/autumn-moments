@@ -69,3 +69,7 @@ The first expanded park screenshots had washed-out materials and a floating fore
 
 ### Screenshot follow-up
 Checked 1280×800 Chromium scene: removed an oversized foreground guidance sign; lowered the far ridge so the blue sky is visible at the shallower outdoor viewing angle; slightly deepened tree canopy colors. Ground, path and home assets continue to use project-owned procedural meshes. Real player preference and actual mobile FPS are not inferred from screenshots.
+
+
+## V0.6a animation study: readable animal intent
+The first pet now communicates intentions through gait, lowered head for sniffing, seated body, attentive head and tail, and a short greeting approach once familiar. The leg motion is procedural and temporary, not an authored skeletal animation. Keep recognizable short pauses between behaviors; do not replace all waiting with constant idle wagging. Visual/mobile feel still requires human acceptance.

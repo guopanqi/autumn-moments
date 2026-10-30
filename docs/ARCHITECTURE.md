@@ -125,3 +125,8 @@ V0.3 已有 `autumn-moments:v2`，保存 `{ mood, coins, place, furniture:[{id,k
 
 ## Low-FPS movement correctness
 The original `Math.min(.05,clock.getDelta())` discarded elapsed wall time at low FPS, slowing travel even with correct pathfinding. The render loop now advances up to 250ms in small <=50ms movement/collision/action steps and renders once. This prevents large collision leaps while preserving approximate real-time travel in software WebGL. The daylight shadow map is 1024² with a player-following frustum rather than a giant static map. Test result does not prove production mobile FPS.
+
+
+## V0.6a dog life slice
+ParkDog is a location-local actor with bounded deterministic decisions (wander/sniff/sit/watch/greet). Its shared root moves and is still raycastable. The existing park `Interaction.approach` follows the pet position; `onTargeted` temporarily holds it still before `World.moveTo` calculates a path. The existing action moment invokes `dog.pet()` and persists `dogBond`, with `onActionEnd` releasing the hold. No general NPC AI, dynamic obstacle grid or task manager was introduced; the dog avoids the center's static fixtures by staying within a deliberately small envelope.
+The existing `autumn-moments:v3` save adds optional `dogBond` in range 0–5, interpreted as 0 for legacy saves. The animal is active only while the park Location is active. When indoors, its scene does not continue simulating in the background.

@@ -65,3 +65,7 @@ Keep one stable furniture ID through reposition/rotation. Editing uses a translu
 
 ## V0.5 — Minimum paid work → owned furniture → room placement
 公园现有场景中添加一项整理花坛的付酬短动作，沿用 `Effect.coins` 的动作 cue 结算；不把办公室系统、任务框架或新地点提前引入。小屋保持三种固定价格的预设，购买增加 `owned`，布置占用 `owned - placed`，收起、撤销与重做仅影响 `placed`。升级 v3 存档兼容 v1/v2 已摆放免费家具。当前工作任务重复且低策略性是刻意的 V0.5 非目标；手机交互及审美判断依旧人工验收。
+
+
+## ADR — V0.6a single bounded dog, not an NPC framework
+Before adding a farm or a generic AI framework, animate one dog that makes understandable choices without player clicks. The fixed original park animal now has deterministic local motion, social greeting thresholds and a 0–5 bond, stored as a backward-compatible optional field in v3. Moving clickable actors need a frozen target after click, so extend the existing Interaction by the optional `onTargeted` callback; the existing onActionEnd releases its hold. No game effects are granted until the visible pet cue. This is not navigation-obstacle simulation or a completed animal relationship system.
