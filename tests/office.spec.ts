@@ -86,7 +86,7 @@ test('displayed supervisor cone stops at a desk that actually blocks detection',
     const clipped=Math.hypot(geometry.getX(4),geometry.getZ(4)); // angle -0.336
     const clear=Math.hypot(geometry.getX(11),geometry.getZ(11)); // center ray
     report.onMoment?.();
-    const safeBehindDesk=new manager.position.constructor(-4.75,0,4.25);
+    const safeBehindDesk=manager.position.clone().set(-4.75,0,4.25);
     office.tick(0,.01,safeBehindDesk);
     return {
       managerX:manager.position.x,
