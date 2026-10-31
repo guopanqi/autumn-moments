@@ -87,3 +87,6 @@ The existing puppy now takes independent short walks, sniffs the ground, rests a
 
 ### V0.7 office microgame
 Use the 公司 location button or the park's 公司 sign to enter the office. Work at the left workstation and leave through the right-side exit while avoiding the manager's visible cone. If spotted, return to the entrance and restart the report; completing the report and escaping pays 18 coins exactly once. This is a single place-specific stealth experiment, not a generalized NPC engine.
+
+### V0.6c pasture
+Select 牧场 to visit the cow. Collect one bundle of grass, feed the trough, allow the on-location six-second rest, and collect milk once for 8 coins. FarmCare persists in the existing v3 local save; no offline production or inventory service. The full four-place Chromium suite is green; mobile feel remains a manual check.

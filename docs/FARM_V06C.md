@@ -1,6 +1,6 @@
 # V0.6c — Sunny Pasture / 最小牧场切片
 
-**状态：候选代码已整合到主线，GitHub 验证与人工视觉验收分别记录。**
+**状态：已整合到 main，GitHub Build/Pages 与 Chromium 19/19 回归通过（2026-10-31）；人工视觉/触控验收未完成。**
 
 ## 要回答的体验问题
 
@@ -30,3 +30,10 @@
 - 奶牛不在背景离线觅食，6 秒等待只在牧场活动时递减。
 - 牛奶直接换成 8 金币，是暂时的经济连接，不代表成熟的生产/运输/出售系统。
 - 没有种植、饲料背包、多个动物或复杂 NPC 智能。
+
+## 最终自动化证据
+- [Build run 41172331670](https://github.com/guopanqi/autumn-moments/actions/runs/41172331670)
+- [Chromium run 41172331680](https://github.com/guopanqi/autumn-moments/actions/runs/41172331680)（19/19，含既有场景与办公室）
+- [Pages run 41172331714](https://github.com/guopanqi/autumn-moments/actions/runs/41172331714)
+
+注意：第一次青草悬停的单次指针移动未激活 hover，新增了真实的进入/移出/再次进入点击测试，射线目标确实被识别，尚不代表手机上的点选手感已经可接受。

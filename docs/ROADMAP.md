@@ -161,17 +161,19 @@ V0.5 的“工作”只是一项公园内可重复的短动作，尚无工作日
 
 - [x] Corrected the expanded-neighborhood browser regression to evaluate 60 fixed movement steps instead of elapsed wall-clock seconds; GitHub SwiftShader frame pacing is not a valid measure of navigation or production FPS. Actual device performance remains open.
 
-## V0.6c — 牧场照料最小可玩切片（已合入，待 GitHub 验收）
+## V0.6c — 牧场照料最小可玩切片（已合入并通过自动化验证）
 - [x] 增加第三个 Location：牧场与奶牛，连通公园和小屋。
 - [x] 采草 → 喂牛 → 等待 → 牛奶一次性收取 (+8 金币)；无需新背包/任务系统。
 - [x] v3 可选 farmCare 字段兼容旧存档，取消动作不变更状态。
-- [ ] GitHub CI、Playwright 与 Pages 验证结果待确认；构建通过不等于人工视觉验收。
+- [x] 完整 TypeScript/Vite 和 Pages：[Build run 41172331670](https://github.com/guopanqi/autumn-moments/actions/runs/41172331670)，[Pages run 41172331714](https://github.com/guopanqi/autumn-moments/actions/runs/41172331714)；浏览器 [run 41172331680](https://github.com/guopanqi/autumn-moments/actions/runs/41172331680) 与其余三地点共 19/19 通过。
+- [x] 真实 Chromium 鼠标进入青草目标、点击采草、奶牛等待收奶、旧档迁移和重复结算检查。首次悬停测试未触发提示，补充二次指针移动后真实点击通过；实际触控手感仍未人工验收。
 - [ ] 人工体验：空间大小、牛的反馈、触控可达性、是否值得重复、跨地点动机。
 
 
-## V0.7 — 办公室空间玩法：最小下班循环（开发中）
+## V0.7 — 办公室空间玩法：最小下班循环（代码与自动化验证已完成）
 - [x] 第四个地点办公室，沿用等距相机、角色控制和地点状态生命周期；主管在中央走廊水平巡逻。
 - [x] 可见视锥、可遮挡视线、被发现重置工作进度；从左侧工位整理报告，再沿安全路线到出口领取 18 金币。
 - [x] 工作完成和工资发放分别绑定各自动作时刻；重复出口不能重复领薪。
 - [x] 状态只在本次办公室会话有效，不引入全局任务状态、员工属性或办公室经济系统。
-- [ ] GitHub CI 与浏览器截图验证，以及实机对视线清晰度、操作公平性和趣味性的验收。
+- [x] Chromium 办公室 3 项测试通过：进入与截图、仅出口动作时领薪、视锥发现重置进度；同一主线全部 19/19 通过：[run 41172331680](https://github.com/guopanqi/autumn-moments/actions/runs/41172331680)。
+- [ ] 用户桌面与手机手感验收：红色视锥实际可读性、能否绕开、出口是否容易点到、巡逻是否公平、下班过程是否真正有趣；自动截图不是视觉质量验收。
