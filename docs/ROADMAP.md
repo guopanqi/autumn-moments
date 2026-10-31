@@ -160,3 +160,10 @@ V0.5 的“工作”只是一项公园内可重复的短动作，尚无工作日
 - [x] Visual screenshot follow-up: replaced the oversized ball sign with an unobtrusive rack and transparent touch target; added a regression asserting that a pet request restores the toy even during a fetch.
 
 - [x] Corrected the expanded-neighborhood browser regression to evaluate 60 fixed movement steps instead of elapsed wall-clock seconds; GitHub SwiftShader frame pacing is not a valid measure of navigation or production FPS. Actual device performance remains open.
+
+## V0.6c — 牧场照料最小可玩切片（已合入，待 GitHub 验收）
+- [x] 增加第三个 Location：牧场与奶牛，连通公园和小屋。
+- [x] 采草 → 喂牛 → 等待 → 牛奶一次性收取 (+8 金币)；无需新背包/任务系统。
+- [x] v3 可选 farmCare 字段兼容旧存档，取消动作不变更状态。
+- [ ] GitHub CI、Playwright 与 Pages 验证结果待确认；构建通过不等于人工视觉验收。
+- [ ] 人工体验：空间大小、牛的反馈、触控可达性、是否值得重复、跨地点动机。

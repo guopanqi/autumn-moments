@@ -152,6 +152,9 @@ export function createPark(initialDogBond=0,saveDogBond:(bond:number)=>void=()=>
     const leaf=ball(.06,i%2?'#d6b079':'#e4c88a',(rng()-.5)*21,1.2+rng()*5,(rng()-.5)*14,6,5);
     leaf.castShadow=false;root.add(leaf);return leaf;
   });
+  const farmGate=sign('去牧场',1.8);farmGate.position.set(-12.7,1.6,7.15);root.add(farmGate);
+  interactions.push({id:'park-to-farm',label:'沿小路去牧场',root:farmGate,
+    approach:new THREE.Vector3(-11.9,0,6.35),use:()=>({message:'沿着小路来到山坡牧场。',travel:'farm'})});
   const tickOutskirts=extendPark(root,obstacles,interactions);
   return {id:'park',name:'街角的小公园',note:'微风、树影，还有一些值得停留的瞬间。',root,floor,
     bounds:{minX:-35,maxX:35,minZ:-32,maxZ:32},obstacles,

@@ -6,25 +6,27 @@ import {CameraRig} from './CameraRig';
 import {findPath} from './navigation';
 import {createPark} from '../locations/park';
 import {createHome} from '../locations/home';
+import {createFarm,defaultFarmCare,normalizeFarmCare,type FarmCare} from '../locations/farm';
 import type {Interaction,Location,PlaceId,Effect} from './types';
 import {validFurniture,isFurnitureKind,FURNITURE_KINDS,FURNITURE_PRICES,FURNITURE_LABELS,normalizeOwned,ownedForExisting,
   type FurnitureOwned,type FurnitureKind,type PlacedFurniture} from '../decor/furniture';
 
-type SavedState={mood:number;coins:number;place:PlaceId;furniture:PlacedFurniture[];owned:FurnitureOwned;dogBond:number};
+type SavedState={mood:number;coins:number;place:PlaceId;furniture:PlacedFurniture[];owned:FurnitureOwned;dogBond:number;farmCare:FarmCare};
 const SAVE_KEY='autumn-moments:v3';
 function load():SavedState{
   try{
     const raw=localStorage.getItem(SAVE_KEY)??localStorage.getItem('autumn-moments:v2')??localStorage.getItem('autumn-moments:v1');
     if(raw){
       const saved=JSON.parse(raw) as Partial<SavedState>;
-      if(Number.isFinite(saved.mood)&&Number.isFinite(saved.coins)&&(saved.place==='park'||saved.place==='home')){
+      if(Number.isFinite(saved.mood)&&Number.isFinite(saved.coins)&&(saved.place==='park'||saved.place==='home'||saved.place==='farm')){
         const furniture=Array.isArray(saved.furniture)?saved.furniture.filter(validFurniture).slice(0,35):[];
         return {mood:clamp(saved.mood!,0,100),coins:Math.max(0,Math.floor(saved.coins!)),place:saved.place,
-          furniture,owned:normalizeOwned(saved.owned,furniture),dogBond:Number.isFinite(saved.dogBond)?clamp(Math.floor(saved.dogBond!),0,5):0};
+          furniture,owned:normalizeOwned(saved.owned,furniture),dogBond:Number.isFinite(saved.dogBond)?clamp(Math.floor(saved.dogBond!),0,5):0,
+          farmCare:normalizeFarmCare(saved.farmCare)};
       }
     }
   }catch{/* Save data may be absent or incompatible. */}
-  return {mood:70,coins:20,place:'park',furniture:[],owned:ownedForExisting([]),dogBond:0};
+  return {mood:70,coins:20,place:'park',furniture:[],owned:ownedForExisting([]),dogBond:0,farmCare:defaultFarmCare()};
 }
 function clamp(v:number,a:number,b:number){return Math.min(b,Math.max(a,v));}
 
@@ -81,6 +83,9 @@ export class World {
     this.places.set('home',createHome(this.saved.furniture,items=>{
       this.saved.furniture=items;this.save();this.renderCatalog();
     },kind=>this.available(kind)>0));
+    this.places.set('farm',createFarm(this.saved.farmCare,care=>{
+      this.saved.farmCare=care;this.save();this.renderFarmStatus();
+    }));
     // Reject spatially invalid legacy furniture without losing ownership of valid pieces.
     const accepted=this.places.get('home')!.decoration!.placed.map(p=>({...p}));
     this.saved.furniture=accepted;
@@ -108,7 +113,7 @@ export class World {
     document.querySelectorAll<HTMLButtonElement>('.place-button').forEach(btn=>btn.classList.toggle('active',btn.id==='go-'+id));
     this.closeFurniturePanel();
     const toggle=document.getElementById('decor-toggle');if(toggle)toggle.hidden=id!=='home';
-    this.setHover(null);this.renderHUD();this.renderCatalog();
+    this.setHover(null);this.renderHUD();this.renderCatalog();this.renderFarmStatus();
   }
   private transitionTo(id:PlaceId){
     if(this.transitioning||id===this.active.id)return;
@@ -145,6 +150,7 @@ export class World {
     container.addEventListener('wheel',(e)=>{if(this.active.camera==='isometric'){e.preventDefault();this.camera.zoom(e.deltaY*.013);}}, {passive:false});
     document.getElementById('go-park')?.addEventListener('click',()=>this.transitionTo('park'));
     document.getElementById('go-home')?.addEventListener('click',()=>this.transitionTo('home'));
+    document.getElementById('go-farm')?.addEventListener('click',()=>this.transitionTo('farm'));
     document.getElementById('decor-toggle')?.addEventListener('click',()=>{
       const panel=document.getElementById('decor-panel');
       if(panel&&this.active.id==='home'){
@@ -194,6 +200,14 @@ export class World {
       button.addEventListener('pointercancel',end);
       button.addEventListener('lostpointercapture',()=>this.mobileKeys.delete(dir));
     });
+  }
+  private renderFarmStatus(){
+    const panel=document.getElementById('farm-status');if(!panel)return;
+    panel.hidden=this.active.id!=='farm';
+    if(panel.hidden)return;
+    const c=this.saved.farmCare;
+    const hunger=c.hunger>.6?'有点饿':c.hunger>.25?'正在觅食':'吃得很饱';
+    panel.textContent=`青草：${c.hay?'手里有 1 束':'没有'} · 奶牛：${hunger} · ${c.milkReady?'牛奶准备好了':c.milkDelay>0?'正在休息':'暂无牛奶'}`;
   }
   private available(kind:FurnitureKind){
     const placed=this.places.get('home')?.decoration?.placed.filter(p=>p.kind===kind).length??0;

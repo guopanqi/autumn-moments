@@ -64,3 +64,10 @@ This project is Autumn Moments, a browser-first Three.js life-world. Read `docs/
 - The fetch ball must be visible either at its rack, in flight, or in the dog's mouth, and be reset after completion/cancel. The action cue initiates the toss; early cancellation must not initiate fetch.
 - No currency, inventory or bond reward from fetching. This slice validates a visible sequence and human-directed animal behavior, not a new task engine.
 - Preserve V0.5 money/furniture and V0.6a bond/save schema; re-run Chromium test suite and Pages deployment.
+
+## V0.6c farm slice
+- Keep farm care local to a single Location: one hay bundle, one cow, one cooldown and one milk collection.
+- Award milk coins only at the existing Character action cue; cancellations cannot grant hay, feed or milk.
+- Store only optional normalized farmCare in v3. Retain all existing coins, mood, furniture and dogBond fields.
+- Farm time progresses only while farm is active. Do not imply background/offline simulation.
+- Preserve the farm state and save contract in subsequent location-specific extensions.
