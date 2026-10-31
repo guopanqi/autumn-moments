@@ -122,6 +122,9 @@ test('farm forage is reachable from a real scene click before its reward cue',as
   const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('./?e2e=1');await expect(page.locator('#loading')).toBeHidden({timeout:15000});
   await page.locator('#go-farm').click();await expect(page.locator('#place-name')).toHaveText('山坡上的小牧场');
+  // The scene veil uses a CSS visibility transition. Let it stop intercepting
+  // pointer events before testing real canvas interaction.
+  await expect(page.locator('#scene-wipe')).not.toHaveClass(/visible/);
   const point=await page.evaluate(()=>{
     const w=(window as Window&{__autumnDev?:any}).__autumnDev;
     const interaction=w.active.interactions.find((i:any)=>i.id==='farm-forage');
@@ -133,6 +136,16 @@ test('farm forage is reachable from a real scene click before its reward cue',as
     return {x:rect.left+(target.x+1)*rect.width/2,y:rect.top+(1-target.y)*rect.height/2};
   });
   await page.mouse.move(point.x,point.y);
+  // Distinguish a wrongly projected click from a pointer event blocked by UI.
+  const raycast=await page.evaluate(({x,y})=>{
+    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    const rect=document.querySelector<HTMLCanvasElement>('#viewport canvas')!.getBoundingClientRect();
+    const p=w.pointer;p.set((x-rect.left)/rect.width*2-1,-(y-rect.top)/rect.height*2+1);
+    w.raycaster.setFromCamera(p,w.camera.active);
+    const hits=w.raycaster.intersectObjects(w.active.interactions.map((i:any)=>i.root),true);
+    return hits.slice(0,4).map((h:any)=>h.object.name||h.object.parent?.name||'unnamed');
+  },point);
+  expect(raycast.length).toBeGreaterThan(0);
   await expect(page.locator('#hint')).toContainText('采集一束青草');
   await page.mouse.click(point.x,point.y);
   await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('autumn-moments:v3')??'{}').farmCare.hay),
