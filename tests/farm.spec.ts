@@ -162,3 +162,39 @@ test('farm forage is reachable from a real scene click before its reward cue',as
     {timeout:25000}).toBe(true);
   expect(errors).toEqual([]);
 });
+
+
+test('feeding feedback remains truthful when hunger crosses the threshold during the gesture',async({page})=>{
+  await page.goto('./?e2e=1');
+  await page.evaluate(()=>{
+    const saved=JSON.parse(localStorage.getItem('autumn-moments:v3')??'{}');
+    saved.place='farm';
+    saved.farmCare={hay:true,hunger:.245,milkReady:false,milkDelay:0,milkCollected:0};
+    localStorage.setItem('autumn-moments:v3',JSON.stringify(saved));
+  });
+  await page.reload();
+  await expect(page.locator('#loading')).toBeHidden({timeout:15_000});
+  await expect(page.locator('#place-name')).toHaveText('山坡上的小牧场');
+  const result=await page.evaluate(()=>{
+    const w=(window as Window & {__autumnDev?:any}).__autumnDev;
+    const feed=w.active.interactions.find((i:any)=>i.id==='farm-feed');
+    const initialCoins=JSON.parse(localStorage.getItem('autumn-moments:v3')!).coins;
+    const first=feed.use();
+    // The character is still doing the pet gesture when hunger crosses .25.
+    for(let i=0;i<24;i++)w.active.tick(w.elapsed+i*.05,.05,w.actor.position);
+    feed.onMoment?.();
+    const beforeRetry=JSON.parse(localStorage.getItem('autumn-moments:v3')!).farmCare;
+    const second=feed.use();
+    feed.onMoment?.();
+    const afterRetry=JSON.parse(localStorage.getItem('autumn-moments:v3')!).farmCare;
+    return {firstMessage:first.message,secondMessage:second.message,
+      beforeRetry,afterRetry,initialCoins,
+      finalCoins:JSON.parse(localStorage.getItem('autumn-moments:v3')!).coins};
+  });
+  expect(result.firstMessage).toContain('吃得很饱');
+  expect(result.beforeRetry).toMatchObject({hay:true,milkDelay:0,milkReady:false});
+  expect(result.secondMessage).toContain('低头吃起青草');
+  expect(result.afterRetry.hay).toBe(false);
+  expect(result.afterRetry.milkDelay).toBe(6);
+  expect(result.finalCoins).toBe(result.initialCoins);
+});

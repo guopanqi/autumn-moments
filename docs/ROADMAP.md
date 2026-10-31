@@ -190,3 +190,10 @@ V0.5 的“工作”只是一项公园内可重复的短动作，尚无工作日
 - [x] The office Location is now recreated upon entering from another place. Report readiness, patrol progress and caught status reset without modifying saved coins or other locations.
 - [ ] Chromium regression for leaving after completing the report, re-entering and checking that the exit pays 0 before doing the work again; fill actual run evidence only after CI.
 - [ ] Human acceptance for manager cone legibility, cover fairness, touch exit and repeat-play motivation remains open.
+
+
+## V0.7 现有体验回归：牧场喂食反馈时序（2026-10-31）
+- [x] **代码证据**：`farm-feed.use()` 按当前饥饿程度显示提示，原 `onMoment()` 在稍后的动作时刻重新检查阈值。若饥饿值在这段时间跨过 0.25，玩家看到「奶牛现在吃得很饱」却会消耗青草并开始产奶。
+- [x] **最小修正**：喂食资格在 `use()` 时确定；动作时只在原先有资格且当前条件仍满足时执行，取消/结束清理临时资格。不改牛奶报酬、门槛、时间、UI 或存档结构。
+- [ ] **自动回归**：固定模拟步长跨越饥饿阈值，首次不消耗青草，第二次满足条件后正确喂食。待本提交 GitHub Chromium 结果确认后勾选。
+- [ ] **人工验收仍开放**：鼠标/触屏是否易于点击青草、牛的进食反馈是否清楚、等待是否令人愉快、办公室红色视锥是否公平、跨地点收益是否形成继续游玩的动机。自动测试不能证明这些主观体验。

@@ -105,14 +105,23 @@ export function createFarm(initial:FarmCare=defaultFarmCare(),onChange:(care:Far
     use:()=>({message:care.hay?'手里已经有青草了，先去喂奶牛吧。':'采好一束青草。去食槽看看奶牛。',gesture:'pet'}),
     onMoment:()=>{if(!care.hay){care.hay=true;publish();}}
   });
+  // The feedback and action cue must use the same eligibility decision.
+  // Hunger changes during the gesture; crossing .25 must not silently consume
+  // grass after the player has been told that the cow is still full.
+  let feedEligibleAtStart=false;
   interactions.push({id:'farm-feed',label:'把青草放进食槽',root:trough,
     approach:new THREE.Vector3(.05,0,-.12),
-    use:()=>({message:!care.hay?'先到草地采一些青草。':care.milkReady?'先把已经准备好的牛奶收起来。':care.milkDelay>0?'奶牛正在休息，稍后再来。':care.hunger<.25?'奶牛现在吃得很饱，等它饿一点再来。':'奶牛低头吃起青草，一会儿会有牛奶。',gesture:'pet'}),
+    use:()=>{
+      feedEligibleAtStart=care.hay&&care.hunger>=.25&&!care.milkReady&&care.milkDelay===0;
+      return {message:!care.hay?'先到草地采一些青草。':care.milkReady?'先把已经准备好的牛奶收起来。':care.milkDelay>0?'奶牛正在休息，稍后再来。':!feedEligibleAtStart?'奶牛现在吃得很饱，等它饿一点再来。':'奶牛低头吃起青草，一会儿会有牛奶。',gesture:'pet'};
+    },
     onMoment:()=>{
-      if(care.hay&&care.hunger>=.25&&!care.milkReady&&care.milkDelay===0){
+      if(feedEligibleAtStart&&care.hay&&care.hunger>=.25&&!care.milkReady&&care.milkDelay===0){
         care.hay=false;care.hunger=0;care.milkDelay=6;publish();
       }
-    }
+      feedEligibleAtStart=false;
+    },
+    onActionEnd:()=>{feedEligibleAtStart=false;}
   });
   // Capture entitlement when the action starts. If milk becomes ready mid-gesture,
   // the current (previously empty) pail check must not consume it without pay.
