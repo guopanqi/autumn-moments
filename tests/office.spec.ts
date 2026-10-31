@@ -67,3 +67,38 @@ test('being seen cancels office report, hides behind desks and preserves save',a
   expect(outcome.after).toContain('重新整理');
   expect(outcome.cash).toBe(outcome.coinsBefore);
 });
+
+
+test('displayed supervisor cone stops at a desk that actually blocks detection',async({page})=>{
+  await page.goto('./?e2e=1');
+  await expect(page.locator('#loading')).toBeHidden({timeout:15_000});
+  await page.locator('#go-office').click();
+  await expect(page.locator('#place-name')).toHaveText('午后办公室');
+  const evidence=await page.evaluate(()=>{
+    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    const office=w.active;
+    const manager=office.root.getObjectByName('Office manager')!;
+    const cone=office.root.getObjectByName('Manager vision cone') as any;
+    const report=office.interactions.find((i:any)=>i.id==='office-work');
+    // Leftmost patrol position is where the left-hand desk occludes the cone edge.
+    office.tick(0,Math.PI*1.5/.60,office.spawn);
+    const geometry=cone.geometry.getAttribute('position');
+    const clipped=Math.hypot(geometry.getX(4),geometry.getZ(4)); // angle -0.336
+    const clear=Math.hypot(geometry.getX(11),geometry.getZ(11)); // center ray
+    report.onMoment?.();
+    const safeBehindDesk=new manager.position.constructor(-4.75,0,4.25);
+    office.tick(0,.01,safeBehindDesk);
+    return {
+      managerX:manager.position.x,
+      clipped,clear,
+      status:document.getElementById('office-status')?.textContent,
+      savedCoins:JSON.parse(localStorage.getItem('autumn-moments:v3')??'{}').coins
+    };
+  });
+  expect(evidence.managerX).toBeCloseTo(-3.05,1);
+  expect(evidence.clipped).toBeLessThan(3.9);
+  expect(evidence.clear).toBeCloseTo(5.5,1);
+  // The player is inside the angular cone, but the desk blocks the actual ray.
+  expect(evidence.status).toContain('报告完成');
+  expect(evidence.savedCoins).toBe(20);
+});

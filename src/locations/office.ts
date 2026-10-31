@@ -45,16 +45,40 @@ function viewCone(){
   mesh.name='Manager vision cone';mesh.renderOrder=2;
   return mesh;
 }
+/** Clip the *displayed* cone at the same circular desk proxies used by detection.
+ * Geometry stays on the ground, while the boss and collision rules remain unchanged.
+ */
+function clipViewCone(cone:THREE.Mesh,manager:THREE.Vector3,obstacles:Obstacle[]){
+  const positions=cone.geometry.getAttribute('position') as THREE.BufferAttribute;
+  const steps=positions.count-2;
+  for(let i=0;i<=steps;i++){
+    const angle=-VIEW_ANGLE+2*VIEW_ANGLE*i/steps;
+    const dx=Math.sin(angle),dz=Math.cos(angle);
+    let distance=VIEW_DISTANCE;
+    for(const obstacle of obstacles){
+      const x=obstacle.x-manager.x,z=obstacle.z-manager.z;
+      const along=x*dx+z*dz;
+      if(along<=0)continue;
+      const radius=obstacle.r+.015;
+      const perpendicularSq=x*x+z*z-along*along;
+      if(perpendicularSq>=radius*radius)continue;
+      const hit=along-Math.sqrt(Math.max(0,radius*radius-perpendicularSq));
+      distance=Math.min(distance,Math.max(0,hit));
+    }
+    positions.setXYZ(i+1,dx*distance,.045,dz*distance);
+  }
+  positions.needsUpdate=true;
+}
 function managerModel(){
   const root=new THREE.Group();root.name='Office manager';
-  root.add(viewCone());
+  const cone=viewCone();root.add(cone);
   root.add(cylinder(.28,.30,.77,'#879b8c',0,.82,0));
   root.add(ball(.30,'#e9c3a5',0,1.43,0,12,10));
   root.add(ball(.31,'#645a52',0,1.63,-.07,12,8));
   root.add(ball(.045,'#55504b',-.12,1.44,.30,8,6),ball(.045,'#55504b',.12,1.44,.30,8,6));
   const arm=box(.13,.60,.16,'#879b8c',.34,.89,0);root.add(arm);
   const legs=[-.14,.14].map(x=>box(.18,.44,.20,'#646b67',x,.30,0));root.add(...legs);
-  return {root,legs};
+  return {root,legs,cone};
 }
 export interface OfficeCallbacks {
   onCaught:()=>void;
@@ -119,6 +143,7 @@ export function createOffice(callbacks:OfficeCallbacks):Location{
     tick:(_elapsed,dt,player)=>{
       clock+=dt;
       manager.position.set(Math.sin(clock*.60)*3.05,0,-.5);
+      clipViewCone(supervisor.cone,manager.position,obstacles);
       supervisor.legs[0].rotation.x=Math.sin(clock*8)*.13;
       supervisor.legs[1].rotation.x=-Math.sin(clock*8)*.13;
       grace=Math.max(0,grace-dt);

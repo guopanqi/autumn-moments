@@ -85,3 +85,7 @@ Chromium screenshot showed the original 1.65-unit toy instruction sign blocking 
 
 ## V0.7 office visual language
 The office uses muted warm timber, simple partitions and a coral-red transparent forward sector to make spatial risk readable at an isometric camera angle. Supervisor body position, sightline and reward cues are visual prototypes; automated checks cannot decide whether the stealth route is interesting or visually fair.
+
+
+## Office sightline consistency correction
+The original full red sector could cover desk-shadowed spaces the supervisor could not actually see. The displayed sector now clips its existing rays against the same circular obstacle proxies used by `officeCanSee`; the detection rule is unchanged. Visual geometry remains approximate (finite angular segments and circular desk proxies), so a human must still judge whether its edges are readable and fair.
