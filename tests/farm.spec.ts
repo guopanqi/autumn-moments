@@ -146,6 +146,16 @@ test('farm forage is reachable from a real scene click before its reward cue',as
     return hits.slice(0,4).map((h:any)=>h.object.name||h.object.parent?.name||'unnamed');
   },point);
   expect(raycast.length).toBeGreaterThan(0);
+  const hoverDetails=await page.evaluate(({x,y})=>{
+    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    const top=document.elementFromPoint(x,y);
+    return {x,y,element:top?.tagName,elementId:top?.id,className:String(top?.className??''),
+      transitioning:w.transitioning,hovered:w.hovered?.id,hint:document.getElementById('hint')?.textContent};
+  },point);
+  console.log('Forage interaction diagnostics',JSON.stringify({raycast,hoverDetails}));
+  // The pointer must genuinely reach the scene, not only pass an internal raycast.
+  await page.mouse.move(point.x-12,point.y-12);
+  await page.mouse.move(point.x,point.y);
   await expect(page.locator('#hint')).toContainText('采集一束青草');
   await page.mouse.click(point.x,point.y);
   await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('autumn-moments:v3')??'{}').farmCare.hay),
