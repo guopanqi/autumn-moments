@@ -76,3 +76,8 @@
 .farm-status{position:absolute;z-index:4;left:clamp(16px,3vw,35px);bottom:101px;max-width:min(520px,calc(100vw - 35px));padding:9px 14px;border-radius:13px;background:#fff8e7e8;color:#657b65;font-size:12px;box-shadow:0 6px 22px #70877425;pointer-events:none}
 .farm-status[hidden]{display:none}
 @media(max-width:780px){.farm-status{left:12px;bottom:103px;max-width:calc(100vw - 24px);font-size:10px;padding:7px 9px}}
+
+/* A concise, location-specific objective; no universal mission panel. */
+.office-status{position:absolute;z-index:4;left:clamp(16px,3vw,35px);bottom:100px;max-width:min(520px,calc(100vw - 30px));padding:10px 14px;border-radius:13px;background:#fff8e7eb;color:#6f756a;font-size:12px;box-shadow:0 6px 22px #70877425;pointer-events:none}
+.office-status[hidden]{display:none}
+@media(max-width:780px){.office-status{left:12px;bottom:100px;max-width:calc(100vw - 24px);font-size:10px;padding:7px 9px}.location-buttons{gap:4px}}

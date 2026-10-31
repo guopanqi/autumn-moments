@@ -137,3 +137,7 @@ For tiny animated actors the park dog includes an invisible raycast proxy; ordin
 
 ## V0.6b — Target cancellation and animal fetch
 The previous actor movement path could be cancelled before interaction arrival, leaving `onTargeted` temporary holds in place. `Character.follow` now accepts an optional approach-cancel callback; `World.moveTo` passes `onActionEnd` on early abort and for unwalkable targets, while the normal action lifecycle still owns cleanup after arrival. Dog fetch is strictly local to ParkDog's tick and the existing park Location; no event bus, persistent fetch counter or new save schema.
+
+
+## V0.7 office escape slice
+`src/locations/office.ts` owns one deterministic patrolling manager, fixed forward sector vision, circular-obstacle line-of-sight occlusion, one desk action, and one exit. Reuses existing isometric CameraRig, spatial pathing, Character cue and Effect.coins, not a general minigame framework. Work status is transient inside the office Location; no new save schema. Caught calls an injected callback to reset the player to entrance without altering coins. Salary is paid only at the exit's existing action cue; the office departure runs at action finish. The visible sector communicates threat but requires human fairness evaluation.

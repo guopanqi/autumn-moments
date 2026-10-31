@@ -71,3 +71,11 @@ This project is Autumn Moments, a browser-first Three.js life-world. Read `docs/
 - Store only optional normalized farmCare in v3. Retain all existing coins, mood, furniture and dogBond fields.
 - Farm time progresses only while farm is active. Do not imply background/offline simulation.
 - Preserve the farm state and save contract in subsequent location-specific extensions.
+
+
+## V0.7 office invariants
+- Keep desk work and office wages local to office.ts. Do not implement a generic mission engine.
+- Boss detection must use geometry (forward angle, range and obstacle occlusion), not a chance roll.
+- Getting caught clears only the current office work progress; no negative currency or save mutation.
+- A successful exit pays exactly once at the existing action cue; it must not pay on click, on early cancellation or on repeated exit.
+- Office work state is ephemeral; all existing v3 persisted fields (including farmCare) remain unchanged.

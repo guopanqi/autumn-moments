@@ -1,6 +1,6 @@
 import type * as THREE from 'three';
 import type {HomeDecoration} from '../decor/furniture';
-export type PlaceId = 'park' | 'home' | 'farm';
+export type PlaceId = 'park' | 'home' | 'farm' | 'office';
 export type CameraMode = 'follow' | 'isometric';
 export type Obstacle = { x:number; z:number; r:number };
 export type Bounds = { minX:number;maxX:number;minZ:number;maxZ:number };

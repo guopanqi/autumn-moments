@@ -81,3 +81,7 @@ The single warm-coral toy is readable in three phases: on a low rack, briefly in
 
 ### V0.6b visual review adjustment
 Chromium screenshot showed the original 1.65-unit toy instruction sign blocking the character and central long view. The physical prop now has only a low rack, a coral ball and a transparent 3D touch volume. Text appears through the existing hover interaction hint; visual balance and mobile touch remain for human evaluation.
+
+
+## V0.7 office visual language
+The office uses muted warm timber, simple partitions and a coral-red transparent forward sector to make spatial risk readable at an isometric camera angle. Supervisor body position, sightline and reward cues are visual prototypes; automated checks cannot decide whether the stealth route is interesting or visually fair.

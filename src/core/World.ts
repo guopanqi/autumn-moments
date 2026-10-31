@@ -7,6 +7,7 @@ import {findPath} from './navigation';
 import {createPark} from '../locations/park';
 import {createHome} from '../locations/home';
 import {createFarm,defaultFarmCare,normalizeFarmCare,type FarmCare} from '../locations/farm';
+import {createOffice} from '../locations/office';
 import type {Interaction,Location,PlaceId,Effect} from './types';
 import {validFurniture,isFurnitureKind,FURNITURE_KINDS,FURNITURE_PRICES,FURNITURE_LABELS,normalizeOwned,ownedForExisting,
   type FurnitureOwned,type FurnitureKind,type PlacedFurniture} from '../decor/furniture';
@@ -18,7 +19,7 @@ function load():SavedState{
     const raw=localStorage.getItem(SAVE_KEY)??localStorage.getItem('autumn-moments:v2')??localStorage.getItem('autumn-moments:v1');
     if(raw){
       const saved=JSON.parse(raw) as Partial<SavedState>;
-      if(Number.isFinite(saved.mood)&&Number.isFinite(saved.coins)&&(saved.place==='park'||saved.place==='home'||saved.place==='farm')){
+      if(Number.isFinite(saved.mood)&&Number.isFinite(saved.coins)&&(saved.place==='park'||saved.place==='home'||saved.place==='farm'||saved.place==='office')){
         const furniture=Array.isArray(saved.furniture)?saved.furniture.filter(validFurniture).slice(0,35):[];
         return {mood:clamp(saved.mood!,0,100),coins:Math.max(0,Math.floor(saved.coins!)),place:saved.place,
           furniture,owned:normalizeOwned(saved.owned,furniture),dogBond:Number.isFinite(saved.dogBond)?clamp(Math.floor(saved.dogBond!),0,5):0,
@@ -86,6 +87,11 @@ export class World {
     this.places.set('farm',createFarm(this.saved.farmCare,care=>{
       this.saved.farmCare=care;this.save();this.renderFarmStatus();
     }));
+    this.places.set('office',createOffice({
+      onCaught:()=>{this.actor.teleport(this.active.spawn);this.notify('被主管看到了！报告需要重新整理。');},
+      onDepart:()=>this.transitionTo('park'),
+      onStatus:value=>{const label=document.getElementById('office-status');if(label)label.textContent=value;}
+    }));
     // Reject spatially invalid legacy furniture without losing ownership of valid pieces.
     const accepted=this.places.get('home')!.decoration!.placed.map(p=>({...p}));
     this.saved.furniture=accepted;
@@ -113,6 +119,7 @@ export class World {
     document.querySelectorAll<HTMLButtonElement>('.place-button').forEach(btn=>btn.classList.toggle('active',btn.id==='go-'+id));
     this.closeFurniturePanel();
     const toggle=document.getElementById('decor-toggle');if(toggle)toggle.hidden=id!=='home';
+    const officeStatus=document.getElementById('office-status');if(officeStatus)officeStatus.hidden=id!=='office';
     this.setHover(null);this.renderHUD();this.renderCatalog();this.renderFarmStatus();
   }
   private transitionTo(id:PlaceId){
@@ -151,6 +158,7 @@ export class World {
     document.getElementById('go-park')?.addEventListener('click',()=>this.transitionTo('park'));
     document.getElementById('go-home')?.addEventListener('click',()=>this.transitionTo('home'));
     document.getElementById('go-farm')?.addEventListener('click',()=>this.transitionTo('farm'));
+    document.getElementById('go-office')?.addEventListener('click',()=>this.transitionTo('office'));
     document.getElementById('decor-toggle')?.addEventListener('click',()=>{
       const panel=document.getElementById('decor-panel');
       if(panel&&this.active.id==='home'){

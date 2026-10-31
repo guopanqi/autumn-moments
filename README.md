@@ -84,3 +84,6 @@ Outdoor park paths now continue into a small neighborhood with a village road, f
 
 ### V0.6a — A living puppy in the park
 The existing puppy now takes independent short walks, sniffs the ground, rests and notices nearby visitors. After repeated successful petting actions it is increasingly willing to approach the player; the 0–5 relationship persists as optional `dogBond` in the existing v3 save. Click an animated dog to approach and pet it; canceled actions do not grant relationship progress. The park, house, work and furniture economy remain intact. No new location or generic NPC engine was added. These are procedural motion prototypes, not final skeletal animations; phone performance and animation appeal still need user review.
+
+### V0.7 office microgame
+Use the 公司 location button or the park's 公司 sign to enter the office. Work at the left workstation and leave through the right-side exit while avoiding the manager's visible cone. If spotted, return to the entrance and restart the report; completing the report and escaping pays 18 coins exactly once. This is a single place-specific stealth experiment, not a generalized NPC engine.
