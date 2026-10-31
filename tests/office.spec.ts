@@ -102,3 +102,34 @@ test('displayed supervisor cone stops at a desk that actually blocks detection',
   expect(evidence.status).toContain('报告完成');
   expect(evidence.savedCoins).toBe(20);
 });
+
+
+test('returning to office after leaving discards previous report without spending or awarding coins',async({page})=>{
+  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('./?e2e=1');
+  await expect(page.locator('#loading')).toBeHidden({timeout:15_000});
+  await page.locator('#go-office').click();
+  await expect(page.locator('#place-name')).toHaveText('午后办公室');
+  const before=await page.evaluate(()=>{
+    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    const desk=w.active.interactions.find((i:any)=>i.id==='office-work');
+    desk.use();desk.onMoment?.();
+    return {status:document.getElementById('office-status')!.textContent,
+      coins:JSON.parse(localStorage.getItem('autumn-moments:v3')??'{}').coins};
+  });
+  expect(before.status).toContain('报告完成');
+  await page.locator('#go-park').click();
+  await expect(page.locator('#place-name')).toHaveText('街角的小公园');
+  await page.locator('#go-office').click();
+  await expect(page.locator('#place-name')).toHaveText('午后办公室');
+  await expect(page.locator('#office-status')).toContainText('沿左侧走到工位');
+  const after=await page.evaluate(()=>{
+    const w=(window as Window&{__autumnDev?:any}).__autumnDev;
+    const exit=w.active.interactions.find((i:any)=>i.id==='office-exit');
+    return {wage:exit.use().coins??0,
+      coins:JSON.parse(localStorage.getItem('autumn-moments:v3')??'{}').coins};
+  });
+  expect(after.wage).toBe(0);
+  expect(after.coins).toBe(before.coins);
+  expect(errors).toEqual([]);
+});

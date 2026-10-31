@@ -87,11 +87,7 @@ export class World {
     this.places.set('farm',createFarm(this.saved.farmCare,care=>{
       this.saved.farmCare=care;this.save();this.renderFarmStatus();
     }));
-    this.places.set('office',createOffice({
-      onCaught:()=>{this.actor.teleport(this.active.spawn);this.notify('被主管看到了！报告需要重新整理。');},
-      onDepart:()=>this.transitionTo('park'),
-      onStatus:value=>{const label=document.getElementById('office-status');if(label)label.textContent=value;}
-    }));
+    // Office progress is visit-scoped and is constructed in switchPlace().
     // Reject spatially invalid legacy furniture without losing ownership of valid pieces.
     const accepted=this.places.get('home')!.decoration!.placed.map(p=>({...p}));
     this.saved.furniture=accepted;
@@ -107,7 +103,17 @@ export class World {
     this.renderer.setSize(container.clientWidth,container.clientHeight);
     this.camera.resize(container.clientWidth,container.clientHeight);
   }
+  private createOfficeVisit():Location{
+    return createOffice({
+      onCaught:()=>{this.actor.teleport(this.active.spawn);this.notify('被主管看到了！报告需要重新整理。');},
+      onDepart:()=>this.transitionTo('park'),
+      onStatus:value=>{const label=document.getElementById('office-status');if(label)label.textContent=value;}
+    });
+  }
   switchPlace(id:PlaceId){
+    // Leaving work ends that shift. A fresh office visit must not inherit a
+    // completed report, previous detection status or patrol timing.
+    if(id==='office'&&this.active?.id!=='office')this.places.set('office',this.createOfficeVisit());
     if(this.active){this.active.decoration?.clearSelection();this.scene.remove(this.active.root);}
     this.active=this.places.get(id)!;
     this.scene.add(this.active.root);

@@ -183,3 +183,10 @@ V0.5 的“工作”只是一项公园内可重复的短动作，尚无工作日
 - [x] 代码可复现：主管在巡逻最左端（x=-3.05）时，办公桌后方的玩家（x=-4.75, z=4.25）位于原红色扇形内，但 `officeCanSee` 因桌面障碍不判定发现。原扇形没有使用障碍物截断，存在误导。
 - [x] 只改变主管的扇形展示：沿已有各角度射线求与已有办公桌圆形碰撞代理的最近交点；不改变侦测、工资、移动或存档。
 - [ ] 真机/真人验收：半透明边界是否清晰、桌沿是否明显穿插，以及路线是否对初次玩家公平。Chromium 数值断言不能替代潜行体验。
+
+
+### V0.7 office visit lifecycle regression (2026-10-31)
+- [x] Verified a code-level loophole: the office Location was created only once, leaving `shiftReady` in its closure even after travelling elsewhere. A later visit could use the finished report to skip the stealth job.
+- [x] The office Location is now recreated upon entering from another place. Report readiness, patrol progress and caught status reset without modifying saved coins or other locations.
+- [ ] Chromium regression for leaving after completing the report, re-entering and checking that the exit pays 0 before doing the work again; fill actual run evidence only after CI.
+- [ ] Human acceptance for manager cone legibility, cover fairness, touch exit and repeat-play motivation remains open.
